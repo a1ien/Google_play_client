@@ -21,11 +21,6 @@ MainWindow::~MainWindow()
 
 void MainWindow::onLogon()
 {
-  Request_RequestGroup group;
-  AppsRequest app;
-  app.set_query("pname:com.kebab.Llama");
-  app.set_startindex(0);
-  app.set_entriescount(10);
-  group.mutable_appsrequest()->CopyFrom(app);
-  session->execute(group);
+  session->getAppInfo("");
+
 }

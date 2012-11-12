@@ -13,7 +13,7 @@ class MarketSession : public QObject
 {
     Q_OBJECT
 public:
-    explicit MarketSession(bool isSecure=false, QObject *parent = 0);
+    explicit MarketSession(QObject *parent = 0);
 
     void login(QString email, QString password, QString androidId,QString accountType);
     void setAndroidId(QString& androidId) { context.set_androidid(androidId.toAscii()); }
@@ -23,10 +23,11 @@ public:
             }
     QString& getAuthSubToken() { return authSubToken;}
 
-    Response_ResponseGroup execute(Request_RequestGroup  requestGroup);
+    Response_ResponseGroup *execute(Request_RequestGroup  requestGroup);
+    App* getAppInfo(QString name);
 private:
     void postUrl(const QString& url, QMap<QString, QString> params);
-    Response *executeProtobuf(Request request);
+    Response executeProtobuf(Request request);
     QByteArray executeRawHttpQuery(const QByteArray& request);
     QByteArray executeRawHttpsQuery(const QByteArray& request);
     QByteArray gzipDecompress(QByteArray compressData);
@@ -46,7 +47,8 @@ private:
 
     RequestContext context;
     Request request;
-    QString authSubToken;
+    QString authSubToken_unsec;
+    QString authSubToken_sec;
     QNetworkAccessManager qnam;
     QNetworkReply* http;
 };
