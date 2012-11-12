@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
@@ -21,6 +22,15 @@ MainWindow::~MainWindow()
 
 void MainWindow::onLogon()
 {
-  session->getAppInfo("");
+  App app;
+  app.CopyFrom(session->getAppInfo(""));
 
+
+  Request_RequestGroup group;
+  GetAssetRequest assetRequest;
+  assetRequest.set_assetid(app.id());
+
+
+  group.mutable_getassetrequest()->CopyFrom(assetRequest);
+  qDebug()<<session->execute(group)->DebugString().c_str();
 }
