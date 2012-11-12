@@ -28,4 +28,6 @@ void MainWindow::onLogon()
   app.set_entriescount(10);
   group.mutable_appsrequest()->CopyFrom(app);
   session->execute(group);
+
+
 }

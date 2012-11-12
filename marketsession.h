@@ -13,7 +13,7 @@ class MarketSession : public QObject
 {
     Q_OBJECT
 public:
-    explicit MarketSession(QObject *parent = 0);
+    explicit MarketSession(bool isSecure=false, QObject *parent = 0);
 
     void login(QString email, QString password, QString androidId,QString accountType);
     void setAndroidId(QString& androidId) { context.set_androidid(androidId.toAscii()); }
@@ -26,7 +26,7 @@ public:
     Response_ResponseGroup execute(Request_RequestGroup  requestGroup);
 private:
     void postUrl(const QString& url, QMap<QString, QString> params);
-    Response executeProtobuf(Request request);
+    Response *executeProtobuf(Request request);
     QByteArray executeRawHttpQuery(const QByteArray& request);
     QByteArray executeRawHttpsQuery(const QByteArray& request);
     QByteArray gzipDecompress(QByteArray compressData);

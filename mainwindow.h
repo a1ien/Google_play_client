@@ -17,7 +17,8 @@ class MainWindow : public QMainWindow
 public:
   explicit MainWindow(QWidget *parent = 0);
   ~MainWindow();
-  
+public slots:
+  void onLogon();
 private:
   Ui::MainWindow *ui;
   Settings* settings;

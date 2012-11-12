@@ -2,18 +2,19 @@
 #include <QtNetwork/QNetworkRequest>
 #include <QStringList>
 #include <QEventLoop>
+#include <QDebug>
 #include "zlib/zlib.h"
 #include "marketsession.h"
 
 
-MarketSession::MarketSession(QObject *parent) :
+MarketSession::MarketSession(bool isSecure,QObject *parent) :
     QObject(parent),
-    SERVICE("android"),
+    SERVICE(isSecure?"androidsecure":"android"),
     URL_LOGIN("https://www.google.com/accounts/ClientLogin")
 
 {
 
-    context.set_issecure(false);
+    context.set_issecure(isSecure);
     context.set_version(2009011);
     context.set_usercountry("GB");
     context.set_userlanguage("en");
@@ -28,15 +29,11 @@ Response_ResponseGroup MarketSession::execute(Request_RequestGroup requestGroup)
 {
 
     request.mutable_context()->CopyFrom(context);
-    AppsRequest app;
-    app.set_query("pname:com.kebab.Llama");
-    app.set_startindex(0);
-    app.set_entriescount(10);
 
     request.add_requestgroup()->CopyFrom(requestGroup);
 
-//    qDebug(request.DebugString().c_str());
-//    qDebug(executeProtobuf(request).DebugString().c_str());
+    qDebug(request.DebugString().c_str());
+    qDebug(executeProtobuf(request)->DebugString().c_str());
 
 }
 
@@ -79,7 +76,6 @@ void MarketSession::postUrl(const QString& url, QMap<QString, QString> params)
         data.append(QString("&%1=%2").arg(key).arg(params.value(key)));
     }
     data.remove(0,1);
-    qDebug(data.toAscii());
     QNetworkRequest req;
     req.setUrl(url);
     req.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
@@ -88,7 +84,7 @@ void MarketSession::postUrl(const QString& url, QMap<QString, QString> params)
 }
 
 
-Response MarketSession::executeProtobuf(Request request)
+Response *MarketSession::executeProtobuf(Request request)
 {
     QByteArray requestBytes(request.SerializeAsString().c_str(),request.ByteSize());
     QByteArray responseBytes;
@@ -96,10 +92,9 @@ Response MarketSession::executeProtobuf(Request request)
         responseBytes = executeRawHttpQuery(requestBytes);
     else
         responseBytes = executeRawHttpsQuery(requestBytes);
-    Response r;
-    r.ParseFromArray(responseBytes.constData(),responseBytes.size());
-    r.DebugString();
-    Response_ResponseGroup group=r.responsegroup(0);
+    Response* r=new Response();
+    r->ParseFromArray(responseBytes.constData(),responseBytes.size());
+
     return r;
 }
 
@@ -121,7 +116,8 @@ QByteArray MarketSession::executeRawHttpQuery(const QByteArray &request)
     QEventLoop eventLoop;
     connect(http,SIGNAL(finished()),&eventLoop, SLOT(quit()));
     eventLoop.exec();
-    data=gzipDecompress(http->read(http->header(QNetworkRequest::ContentLengthHeader).toUInt()));
+    qint32 len=http->header(QNetworkRequest::ContentLengthHeader).toUInt();
+    data=gzipDecompress(http->read(len));
     delete http;
     return data;
 }
