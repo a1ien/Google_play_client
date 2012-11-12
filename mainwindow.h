@@ -20,7 +20,7 @@ public:
   
 private:
   Ui::MainWindow *ui;
-  QSettings* settings;
+  Settings* settings;
   MarketSession* session;
 
 };

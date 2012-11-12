@@ -35,8 +35,8 @@ Response_ResponseGroup MarketSession::execute(Request_RequestGroup requestGroup)
 
     request.add_requestgroup()->CopyFrom(requestGroup);
 
-    qDebug(request.DebugString().c_str());
-    qDebug(executeProtobuf(request).DebugString().c_str());
+//    qDebug(request.DebugString().c_str());
+//    qDebug(executeProtobuf(request).DebugString().c_str());
 
 }
 
