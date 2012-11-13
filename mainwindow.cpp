@@ -24,7 +24,7 @@ void MainWindow::on_Download_clicked()
 {
     if (settings->someIsEmpty())
 
-        QMessageBox::information(this, tr("Your credentials are incompelete"), tr("\tNot all of your settings are specified.\n\n\tPlease, fill all settings fields before download."));
+        QMessageBox::information(this, tr("Your credentials are incompelete"), tr("\tNot all of required settings are specified.\n\n\tPlease, fill the settings fields before download."));
     else
     {
         connect(session,SIGNAL(logged()),this,SLOT(onLogon()));
