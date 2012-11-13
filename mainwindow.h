@@ -25,7 +25,7 @@ private slots:
 
     void on_SearchString_textEdited(const QString &arg1);
 
-    void on_Settings_clicked();
+    void on_SettingsButton_clicked();
 
 public slots:
   void onLogon();

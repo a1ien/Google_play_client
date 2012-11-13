@@ -12,14 +12,7 @@ MainWindow::MainWindow(QWidget *parent) :
   downloader(new Downloader(this))
 {
 
-  ui->setupUi(this);      
-/*
-  connect(session,SIGNAL(logged()),this,SLOT(onLogon()));
-  while(settings->someIsEmpty())
-      settings->exec();
-
-  session->login(settings->email(),settings->password(),settings->androidid(),QString("HOSTED_OR_GOOGLE"));
-*/
+  ui->setupUi(this);
 }
 
 MainWindow::~MainWindow()
@@ -30,7 +23,8 @@ MainWindow::~MainWindow()
 void MainWindow::on_Download_clicked()
 {
     if (settings->someIsEmpty())
-      QMessageBox::information(this,"","sdsdassa\n\n\tDSssDsddsf");
+
+        QMessageBox::information(this, tr("Your credentials are incompelete"), tr("\tNot all of your settings are specified.\n\n\tPlease, fill all settings fields before download."));
     else
     {
         connect(session,SIGNAL(logged()),this,SLOT(onLogon()));
@@ -84,7 +78,8 @@ void MainWindow::on_SearchString_textEdited(const QString &arg1)
         ui->Download->setEnabled(true);
 }
 
-void MainWindow::on_Settings_clicked()
+
+void MainWindow::on_SettingsButton_clicked()
 {
     settings->exec();
 }
