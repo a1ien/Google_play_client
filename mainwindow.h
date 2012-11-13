@@ -21,9 +21,14 @@ public:
   ~MainWindow();
   
 private slots:
-    void on_SearchButton_clicked();
+    void on_Download_clicked();
 
-    void on_DownloadButton_clicked();
+    void on_SearchString_textEdited(const QString &arg1);
+
+    void on_Settings_clicked();
+
+public slots:
+  void onLogon();
 
 private:
   Ui::MainWindow *ui;

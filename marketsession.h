@@ -23,10 +23,11 @@ public:
             }
     QString& getAuthSubToken() { return authSubToken;}
 
-    Response_ResponseGroup execute(Request_RequestGroup  requestGroup);
+    Response_ResponseGroup *execute(Request_RequestGroup  requestGroup);
+    App getAppInfo(QString name);
 private:
     void postUrl(const QString& url, QMap<QString, QString> params);
-    Response executeProtobuf(Request request);
+    QByteArray executeProtobuf(Request request);
     QByteArray executeRawHttpQuery(const QByteArray& request);
     QByteArray executeRawHttpsQuery(const QByteArray& request);
     QByteArray gzipDecompress(QByteArray compressData);
@@ -46,6 +47,7 @@ private:
 
     RequestContext context;
     Request request;
+    Response r;
     QString authSubToken;
     QNetworkAccessManager qnam;
     QNetworkReply* http;

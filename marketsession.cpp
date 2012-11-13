@@ -2,18 +2,19 @@
 #include <QtNetwork/QNetworkRequest>
 #include <QStringList>
 #include <QEventLoop>
+#include <QDebug>
 #include "zlib/zlib.h"
 #include "marketsession.h"
-
+#include <QDebug>
 
 MarketSession::MarketSession(QObject *parent) :
     QObject(parent),
-    SERVICE("android"),
+    SERVICE("androidsecure"),
     URL_LOGIN("https://www.google.com/accounts/ClientLogin")
 
 {
 
-    context.set_issecure(false);
+    context.set_issecure(true);
     context.set_version(2009011);
     context.set_usercountry("GB");
     context.set_userlanguage("en");
@@ -24,20 +25,29 @@ MarketSession::MarketSession(QObject *parent) :
     context.set_simoperatornumeric("310260");
 }
 
-Response_ResponseGroup MarketSession::execute(Request_RequestGroup requestGroup)
+Response_ResponseGroup *MarketSession::execute(Request_RequestGroup requestGroup)
 {
-
+    request.Clear();
     request.mutable_context()->CopyFrom(context);
+    request.add_requestgroup()->CopyFrom(requestGroup);
+
+    qDebug()<<request.DebugString().c_str();
+
+    QByteArray responseBytes=executeProtobuf(request);
+    r.ParseFromArray(responseBytes.constData(),responseBytes.size());
+    return r.mutable_responsegroup(0);
+}
+
+App MarketSession::getAppInfo(QString name)
+{
+    Request_RequestGroup group;
     AppsRequest app;
-    app.set_query("pname:com.kebab.Llama");
+    app.set_query(name.toAscii());
     app.set_startindex(0);
     app.set_entriescount(10);
 
-    request.add_requestgroup()->CopyFrom(requestGroup);
-
-//    qDebug(request.DebugString().c_str());
-//    qDebug(executeProtobuf(request).DebugString().c_str());
-
+    group.mutable_appsrequest()->CopyFrom(app);
+    return execute(group)->mutable_appsresponse()->app(0);
 }
 
 
@@ -65,10 +75,11 @@ void MarketSession::loginFinished()
             break;
         }
     }
-    qDebug(authKey.toAscii());
+    qDebug()<<authKey.toAscii();
     setAuthSubToken(authKey);
-    emit logged();
     http->deleteLater();
+    emit logged();
+
 }
 
 void MarketSession::postUrl(const QString& url, QMap<QString, QString> params)
@@ -79,7 +90,6 @@ void MarketSession::postUrl(const QString& url, QMap<QString, QString> params)
         data.append(QString("&%1=%2").arg(key).arg(params.value(key)));
     }
     data.remove(0,1);
-    qDebug(data.toAscii());
     QNetworkRequest req;
     req.setUrl(url);
     req.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
@@ -88,7 +98,7 @@ void MarketSession::postUrl(const QString& url, QMap<QString, QString> params)
 }
 
 
-Response MarketSession::executeProtobuf(Request request)
+QByteArray MarketSession::executeProtobuf(Request request)
 {
     QByteArray requestBytes(request.SerializeAsString().c_str(),request.ByteSize());
     QByteArray responseBytes;
@@ -96,11 +106,8 @@ Response MarketSession::executeProtobuf(Request request)
         responseBytes = executeRawHttpQuery(requestBytes);
     else
         responseBytes = executeRawHttpsQuery(requestBytes);
-    Response r;
-    r.ParseFromArray(responseBytes.constData(),responseBytes.size());
-    r.DebugString();
-    Response_ResponseGroup group=r.responsegroup(0);
-    return r;
+
+    return responseBytes;
 }
 
 QByteArray MarketSession::executeRawHttpQuery(const QByteArray &request)
@@ -121,7 +128,8 @@ QByteArray MarketSession::executeRawHttpQuery(const QByteArray &request)
     QEventLoop eventLoop;
     connect(http,SIGNAL(finished()),&eventLoop, SLOT(quit()));
     eventLoop.exec();
-    data=gzipDecompress(http->read(http->header(QNetworkRequest::ContentLengthHeader).toUInt()));
+    qint32 len=http->header(QNetworkRequest::ContentLengthHeader).toUInt();
+    data=gzipDecompress(http->read(len));
     delete http;
     return data;
 }
@@ -153,48 +161,48 @@ QByteArray MarketSession::gzipDecompress(QByteArray compressData)
 {
     //decompress GZIP data
     //strip header and trailer
-      compressData.remove(0, 10);
-      compressData.chop(12);
+    compressData.remove(0, 10);
+    compressData.chop(12);
 
-      const int buffersize = 16384;
-      quint8 buffer[buffersize];
+    const int buffersize = 16384;
+    quint8 buffer[buffersize];
 
-      z_stream cmpr_stream;
-      cmpr_stream.next_in = (unsigned char *)compressData.data();
-      cmpr_stream.avail_in = compressData.size();
-      cmpr_stream.total_in = 0;
+    z_stream cmpr_stream;
+    cmpr_stream.next_in = (unsigned char *)compressData.data();
+    cmpr_stream.avail_in = compressData.size();
+    cmpr_stream.total_in = 0;
 
-      cmpr_stream.next_out = buffer;
-      cmpr_stream.avail_out = buffersize;
-      cmpr_stream.total_out = 0;
+    cmpr_stream.next_out = buffer;
+    cmpr_stream.avail_out = buffersize;
+    cmpr_stream.total_out = 0;
 
-      cmpr_stream.zalloc = Z_NULL;
-      cmpr_stream.zalloc = Z_NULL;
+    cmpr_stream.zalloc = Z_NULL;
+    cmpr_stream.zalloc = Z_NULL;
 
-      if( inflateInit2(&cmpr_stream, -8 ) != Z_OK) {
-              qDebug("cmpr_stream error!");
-      }
+    if( inflateInit2(&cmpr_stream, -8 ) != Z_OK) {
+        qDebug("cmpr_stream error!");
+    }
 
-        QByteArray uncompressed;
-        do {
-                int status = inflate( &cmpr_stream, Z_SYNC_FLUSH );
+    QByteArray uncompressed;
+    do {
+        int status = inflate( &cmpr_stream, Z_SYNC_FLUSH );
 
-                if(status == Z_OK || status == Z_STREAM_END) {
-                        uncompressed.append(QByteArray::fromRawData(
-                             (char *)buffer,
-                             buffersize - cmpr_stream.avail_out));
-                        cmpr_stream.next_out = buffer;
-                        cmpr_stream.avail_out = buffersize;
-                } else {
-                         inflateEnd(&cmpr_stream);
-                        }
+        if(status == Z_OK || status == Z_STREAM_END) {
+            uncompressed.append(QByteArray::fromRawData(
+                                    (char *)buffer,
+                                    buffersize - cmpr_stream.avail_out));
+            cmpr_stream.next_out = buffer;
+            cmpr_stream.avail_out = buffersize;
+        } else {
+            inflateEnd(&cmpr_stream);
+        }
 
-                if(status == Z_STREAM_END) {
-                    inflateEnd(&cmpr_stream);
-                    break;
-                }
+        if(status == Z_STREAM_END) {
+            inflateEnd(&cmpr_stream);
+            break;
+        }
 
-        }while(cmpr_stream.avail_out == 0);
+    }while(cmpr_stream.avail_out == 0);
 
-        return uncompressed;
+    return uncompressed;
 }
