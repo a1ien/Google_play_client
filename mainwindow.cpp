@@ -8,7 +8,6 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
       ui(new Ui::MainWindow),
       settings(new Settings(this)),
-      emptySettsWarn(new EmptySettingsWarning()),
       session(new MarketSession()),
       downloader(new Downloader(this))
 {
@@ -21,16 +20,17 @@ MainWindow::~MainWindow() {
     delete ui;
 }
 
-
 void MainWindow::on_Download_clicked()
 {
     if (settings->someIsEmpty())
 
         QMessageBox::information(this, tr("Your credentials are incompelete"), tr("\tNot all of required settings are specified.\n\n\tPlease, fill the settings fields before download."));
+        emit MessageSignal(SettingsNotSet);
     else
     {
         connect(session,SIGNAL(logged()),this,SLOT(onLogon()));
         session->login(settings->email(),settings->password(),settings->androidid(),QString("HOSTED_OR_GOOGLE"));
+
     }
 }
 
@@ -80,8 +80,47 @@ void MainWindow::on_SettingsButton_clicked() {
     settings->exec();
 }
 
-void MainWindow::messageSignalHandler(const QString & description) {
+void MainWindow::messageSignalHandler(MessageTypes type, const QString description) {
     // QMessageBox::information(this, tr("Your credentials are incompelete"),
     //         tr("\tNot all of your settings are specified.\n\n\tPlease, fill all settings fields before download."));
-
+    QString text   = "",
+            header = "";
+    bool appIsDead           = false,
+         displayInMessageBox = false;
+    switch (type) {
+        case EmptyResponce:
+            text = "Responce contains no data.";
+            break;
+        case NoApp:
+            text = "Application not found.";
+            break;
+        case ResponceParsingFailed:
+            text = "Responce has incorrect format and cannot be parsed";
+            break;
+        case SettingsNotSet:
+            text = "\tNot all of your settings are specified."
+                    "\n\n\tPlease, fill all settings fields before download.";
+            header = "\tNot all of your settings are specified.\n\n\tPlease, fill all settings fields before download.";
+            displayInMessageBox = true;
+            break;
+        case UnknownError:
+            text = "Unknown error occured. Send this info to developers please:\n" + description;
+            break;
+        case Waiting:
+            text = "Waiting for your response completion...";
+            break;
+        /*default:
+            text = "The message handler has got a message that is not supported yet."
+                    "\nPlease contact the developer team.";*/
+    }
+    if (displayInMessageBox) {
+        QMessageBox::information(this, header, text);
+    }
+    else {
+        ui->AppInfo->clear();
+        ui->AppInfo->append("Message");
+    }
+    if (appIsDead) {
+        QCoreApplication::exit(type);
+    }
 }
