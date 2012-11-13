@@ -8,7 +8,6 @@ MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
   ui(new Ui::MainWindow),
   settings(new Settings(this)),
-  emptySettsWarn(new EmptySettingsWarning()),
   session(new MarketSession()),
   downloader(new Downloader(this))
 {
@@ -68,13 +67,13 @@ void MainWindow::onLogon()
          break;
      }
      ui->AppInfo->append(QString ("Type:\t%1").arg(qtype));
-     QString filename = QFileDialog::getSaveFileName(this,
+     QString fileName = QFileDialog::getSaveFileName(this,
                                                      tr("Save File"),
                                                      QString ("%1.%2.apk").arg(app.title().c_str()).arg(app.version().c_str()),
                                                      tr("*.apk"));
      if(fileName.isEmpty())
        return;
-     downloader->DownloadFile(session->getInstallAsset(app.id().c_str()),filename);
+     downloader->DownloadFile(session->getInstallAsset(app.id().c_str()),fileName);
   }
 
 }

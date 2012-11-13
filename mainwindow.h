@@ -3,7 +3,6 @@
 
 #include "marketsession.h"
 #include "settings.h"
-#include "emptysettingswarning.h"
 #include "market.pb.h"
 #include "downloader.h"
 #include <QMainWindow>
@@ -34,7 +33,6 @@ public slots:
 private:
   Ui::MainWindow *ui;
   Settings* settings;
-  EmptySettingsWarning *emptySettsWarn;
   MarketSession* session;
   Downloader* downloader;
 
