@@ -1,28 +1,18 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-<<<<<<< HEAD
 #include <QFileDialog>
-=======
-#include <QFile>
->>>>>>> 8e74a52da19ed27e20e4fbeb12ce86621b52127a
+#include <QMessageBox>
 #include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
   ui(new Ui::MainWindow),
   settings(new Settings(this)),
-  emptySettsWarn(new EmptySettingsWarning()),
   session(new MarketSession())
 {
 
-  ui->setupUi(this);      
-/*
-  connect(session,SIGNAL(logged()),this,SLOT(onLogon()));
-  while(settings->someIsEmpty())
-      settings->exec();
-
-  session->login(settings->email(),settings->password(),settings->androidid(),QString("HOSTED_OR_GOOGLE"));
-*/
+  ui->setupUi(this);
+//  ui->SettingsButton->setIcon("toolbar-settings");
 }
 
 MainWindow::~MainWindow()
@@ -33,7 +23,7 @@ MainWindow::~MainWindow()
 void MainWindow::on_Download_clicked()
 {
     if (settings->someIsEmpty())
-        emptySettsWarn->exec();
+        QMessageBox::information(this, tr("Your credentials are incompelete"), tr("\tNot all of your settings are specified.\n\tPlease, fill all settings fields before download."));
     else
     {
         connect(session,SIGNAL(logged()),this,SLOT(onLogon()));
@@ -79,7 +69,6 @@ void MainWindow::onLogon()
 
 }
 
-<<<<<<< HEAD
 void MainWindow::on_SearchString_textEdited(const QString &arg1)
 {
     if (!arg1.trimmed().isEmpty())
@@ -89,11 +78,4 @@ void MainWindow::on_SearchString_textEdited(const QString &arg1)
 void MainWindow::on_Settings_clicked()
 {
     settings->exec();
-=======
-  group.mutable_getassetrequest()->CopyFrom(assetRequest);
-  GetAssetResponse assetResponse=session->execute(group)->getassetresponse();
-  GetAssetResponse_InstallAsset ia=assetResponse.installasset(0);
-  qDebug()<<ia.DebugString().c_str();
-  download=new Downloader(ia);
->>>>>>> 8e74a52da19ed27e20e4fbeb12ce86621b52127a
 }

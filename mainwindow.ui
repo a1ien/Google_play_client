@@ -11,7 +11,6 @@
    </rect>
   </property>
   <property name="windowTitle">
-<<<<<<< HEAD
    <string/>
   </property>
   <widget class="QWidget" name="centralWidget">
@@ -37,27 +36,13 @@
      </widget>
     </item>
     <item row="0" column="2">
-     <widget class="QToolButton" name="Settings">
+     <widget class="QToolButton" name="SettingsButton">
       <property name="text">
        <string>...</string>
       </property>
      </widget>
     </item>
    </layout>
-=======
-   <string>MainWindow</string>
-  </property>
-  <widget class="QWidget" name="centralWidget"/>
-  <widget class="QMenuBar" name="menuBar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>400</width>
-     <height>23</height>
-    </rect>
-   </property>
->>>>>>> 8e74a52da19ed27e20e4fbeb12ce86621b52127a
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
