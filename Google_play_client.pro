@@ -13,23 +13,26 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp \
-    settings.cpp \
-    marketsession.cpp \
-    market.pb.cc \
-    downloader.cpp \
-    decompressor.cpp
+		mainwindow.cpp \
+	settings.cpp \
+	marketsession.cpp \
+	market.pb.cc \
+	downloader.cpp \
+	decompressor.cpp \
+	emptysettingswarning.cpp
 
 HEADERS  += mainwindow.h \
-    settings.h \
-    marketsession.h \
-    market.pb.h \
-    downloader.h \
-    decompressor.h
+	settings.h \
+	marketsession.h \
+	market.pb.h \
+	downloader.h \
+	decompressor.h \
+	emptysettingswarning.h
 
 FORMS    += mainwindow.ui \
-    settings.ui
+	settings.ui \
+	emptysettingswarning.ui
 
 OTHER_FILES += \
-    market.proto
+	market.proto
 LIBS += -lprotobuf

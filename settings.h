@@ -20,14 +20,14 @@ public:
     QString password() {
         return settings->value("password").toString();
     }
-    QString androidid() {
-        return settings->value("androidid").toString();
+    QString androidID() {
+        return settings->value("androidID").toString();
     }
 
     bool someIsEmpty() {
         return settings->value("email").toString().isEmpty()
             || settings->value("password").toString().isEmpty()
-            || settings->value("androidid").toString().isEmpty();
+            || settings->value("androidID").toString().isEmpty();
     }
 
 private slots:

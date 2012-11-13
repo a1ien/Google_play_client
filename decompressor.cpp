@@ -24,9 +24,9 @@ QByteArray Decompressor::getDecompressedData(QByteArray & compressData) {
             return inflated;
         }
     }
-    else {
-        return QByteArray();
-    }
+//    else {
+//        return QByteArray();
+//    }
 
     return QByteArray();
 }

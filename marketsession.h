@@ -8,6 +8,13 @@
 
 const int PROTOCOL_VERSION = 2;
 
+namespace MessageTypes {
+    const uint
+    UnknownError   = 0,
+    EmptyResponce  = 1,
+    SettingsNotSet = 2;
+}
+
 class MarketSession : public QObject {
 Q_OBJECT
 
@@ -31,6 +38,7 @@ public:
 
     static QNetworkRequest setUsualHeaderSet(QUrl url);
 
+    GetAssetResponse::InstallAsset getInstallAsset(QString appId);
 private:
     void postUrl(const QString & url, QMap<QString, QString> params);
     QByteArray executeProtobuf(Request request);
@@ -39,7 +47,7 @@ private:
 
 signals:
     void logged();
-
+    void MessageSignal(uint type, const QString & description = "");
 public slots:
 
 private slots:

@@ -28,23 +28,34 @@ Response_ResponseGroup * MarketSession::execute(Request::RequestGroup requestGro
     request.Clear();
     request.mutable_context()->CopyFrom(context);
     request.add_requestgroup()->CopyFrom(requestGroup);
-
     qDebug() << request.DebugString().c_str();
 
-    QByteArray responseBytes=executeProtobuf(request);
+    QByteArray responseBytes = executeProtobuf(request);
     r.ParseFromArray(responseBytes.constData(), responseBytes.size());
     return r.mutable_responsegroup(0);
 }
 
-App MarketSession::getAppInfo(QString /*name*/) {
-    Request_RequestGroup group;
+App MarketSession::getAppInfo(QString name)
+{
+    Request::RequestGroup group;
     AppsRequest app;
-    app.set_query("pname:com.kebab.Llama");
+    app.set_query(name.toAscii());
     app.set_startindex(0);
     app.set_entriescount(10);
 
     group.mutable_appsrequest()->CopyFrom(app);
-    return execute(group)->mutable_appsresponse()->app(0);
+    Response::ResponseGroup * responseGroup = execute(group);
+    AppsResponse * appResponse = responseGroup->mutable_appsresponse();
+    return appResponse->app(0);
+}
+
+GetAssetResponse_InstallAsset MarketSession::getInstallAsset(QString appId)
+{
+  Request_RequestGroup group;
+  GetAssetRequest assetRequest;
+  assetRequest.set_assetid(appId.toAscii());
+  group.mutable_getassetrequest()->CopyFrom(assetRequest);
+  return execute(group)->getassetresponse().installasset(0);
 }
 
 
@@ -55,7 +66,7 @@ void MarketSession::login(QString email, QString password, QString androidId, QS
     params.insert("Passwd", password);
     params.insert("service", SERVICE);
     params.insert("accountType", accountType);
-    postUrl(URL_LOGIN,params);
+    postUrl(URL_LOGIN, params);
 
 }
 void MarketSession::loginFinished() {
@@ -90,9 +101,7 @@ void MarketSession::postUrl(const QString & url, QMap< QString, QString > params
 
 QByteArray MarketSession::executeProtobuf(Request request) {
     QByteArray requestBytes(request.SerializeAsString().c_str(), request.ByteSize());
-
     // QByteArray responseBytes = executeRawQuery(requestBytes);
-
     return executeRawQuery(requestBytes);
 }
 
@@ -116,11 +125,6 @@ QByteArray MarketSession::executeRawQuery(const QByteArray & request) {
     QUrl url(requestAddress);
     QNetworkAccessManager manager;
     QNetworkRequest req = setUsualHeaderSet(url);
-    /*req.setUrl(url);
-    req.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
-    req.setRawHeader("Cookie", QString("ANDROID=%1").arg(authSubToken).toUtf8());
-    req.setRawHeader("User-Agent", "Android-Market/2 (sapphire PLAT-RC33); gzip");
-    req.setRawHeader("Accept-Charset","ISO-8859-1,utf-8;q=0.7,*;q=0.7");*/
 
     QString requestData = QString("version=%1&request=%2")
             .arg(PROTOCOL_VERSION)
@@ -130,6 +134,7 @@ QByteArray MarketSession::executeRawQuery(const QByteArray & request) {
     connect(http, SIGNAL(finished()), & eventLoop, SLOT(quit()));
     eventLoop.exec();
     qint32 len = http->header(QNetworkRequest::ContentLengthHeader).toUInt();
+    if (len == 0) emit MessageSignal(MessageTypes::EmptyResponce);
     data = gzipDecompress(http->read(len));
     delete http;
     return data;
