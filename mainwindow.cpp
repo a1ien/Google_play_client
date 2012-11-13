@@ -76,6 +76,7 @@ void MainWindow::on_SearchString_textEdited(const QString &arg1)
 {
     if (!arg1.trimmed().isEmpty())
         ui->Download->setEnabled(true);
+    else ui->Download->setEnabled(false);
 }
 
 
