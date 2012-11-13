@@ -29,21 +29,18 @@ Q_OBJECT
 public:
     explicit Settings(QWidget * parent = 0);
     ~Settings();
-    QString email() {
-        return settings->value("email").toString();
-    }
-    QString password() {
-        return settings->value("password").toString();
-    }
-    QString androidID() {
-        return settings->value("androidID").toString();
-    }
+    QString email() { return settings->value("email").toString();}
+    QString password() { return settings->value("password").toString();}
+    QString androidid() { return settings->value("androidid").toString();}
+    QString language() { return settings->value("language").toString();}
+    QString country() { return settings->value("country").toString();}
+    QString operatorSym() { return settings->value("operator").toString();}
+    QString operatorNum() { return settings->value("operatorNum").toString();}
 
-    bool someIsEmpty() {
-        return settings->value("email").toString().isEmpty()
-            || settings->value("password").toString().isEmpty()
-            || settings->value("androidID").toString().isEmpty();
-    }
+    bool someIsEmpty() { return settings->value("email").toString().isEmpty() ||
+                                settings->value("password").toString().isEmpty() ||
+                                settings->value("androidid").toString().isEmpty();}
+
 
 private slots:
     void on_Save_clicked();

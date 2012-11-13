@@ -6,59 +6,195 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>290</width>
-    <height>124</height>
+    <width>552</width>
+    <height>403</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Settings</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
-    <widget class="QGroupBox" name="groupBox">
-     <property name="title">
-      <string>Email</string>
+  <widget class="QGroupBox" name="groupBox">
+   <property name="geometry">
+    <rect>
+     <x>9</x>
+     <y>9</y>
+     <width>264</width>
+     <height>71</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Email</string>
+   </property>
+   <widget class="QLineEdit" name="email">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>113</width>
+      <height>20</height>
+     </rect>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_2">
+   <property name="geometry">
+    <rect>
+     <x>279</x>
+     <y>9</y>
+     <width>264</width>
+     <height>71</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Password</string>
+   </property>
+   <widget class="QLineEdit" name="password">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>113</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="inputMask">
+     <string/>
+    </property>
+    <property name="echoMode">
+     <enum>QLineEdit::Password</enum>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QPushButton" name="Save">
+   <property name="geometry">
+    <rect>
+     <x>170</x>
+     <y>370</y>
+     <width>80</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Save</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="Cancel">
+   <property name="geometry">
+    <rect>
+     <x>290</x>
+     <y>370</y>
+     <width>80</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Cancel</string>
+   </property>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_3">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>90</y>
+     <width>264</width>
+     <height>71</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>AndroidID</string>
+   </property>
+   <widget class="QLineEdit" name="androidid">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>113</width>
+      <height>20</height>
+     </rect>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_4">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>170</y>
+     <width>541</width>
+     <height>181</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Optional</string>
+   </property>
+   <widget class="QGroupBox" name="groupBox_6">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>256</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Country</string>
+    </property>
+    <widget class="QLineEdit" name="country">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>113</width>
+       <height>24</height>
+      </rect>
      </property>
-     <widget class="QLineEdit" name="email">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>20</y>
-        <width>113</width>
-        <height>20</height>
-       </rect>
-      </property>
-     </widget>
     </widget>
-   </item>
-   <item row="0" column="1">
-    <widget class="QGroupBox" name="groupBox_2">
-     <property name="title">
-      <string>Password</string>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_7">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>100</y>
+      <width>257</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Network operator</string>
+    </property>
+    <widget class="QLineEdit" name="operatorSym">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>113</width>
+       <height>24</height>
+      </rect>
      </property>
-     <widget class="QLineEdit" name="password">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>20</y>
-        <width>113</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="inputMask">
-       <string/>
-      </property>
-      <property name="echoMode">
-       <enum>QLineEdit::Password</enum>
-      </property>
-     </widget>
     </widget>
-   </item>
-   <item row="1" column="0" rowspan="2">
-    <widget class="QGroupBox" name="groupBox_3">
-     <property name="title">
-      <string>AndroidID</string>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_8">
+    <property name="geometry">
+     <rect>
+      <x>280</x>
+      <y>100</y>
+      <width>256</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Network operator number</string>
+    </property>
+    <widget class="QLineEdit" name="operatorNum">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>113</width>
+       <height>24</height>
+      </rect>
      </property>
+<<<<<<< HEAD
+=======
      <widget class="QLineEdit" name="androidID">
       <property name="geometry">
        <rect>
@@ -69,23 +205,33 @@
        </rect>
       </property>
      </widget>
+>>>>>>> 92687c0d6527cdf28cee3b00d3bf83a19358878e
     </widget>
-   </item>
-   <item row="1" column="1">
-    <widget class="QPushButton" name="Save">
-     <property name="text">
-      <string>Save</string>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_5">
+    <property name="geometry">
+     <rect>
+      <x>280</x>
+      <y>20</y>
+      <width>257</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Language</string>
+    </property>
+    <widget class="QLineEdit" name="language">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>113</width>
+       <height>24</height>
+      </rect>
      </property>
     </widget>
-   </item>
-   <item row="2" column="1">
-    <widget class="QPushButton" name="Cancel">
-     <property name="text">
-      <string>Cancel</string>
-     </property>
-    </widget>
-   </item>
-  </layout>
+   </widget>
+  </widget>
  </widget>
  <resources/>
  <connections/>
