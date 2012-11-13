@@ -1,6 +1,10 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+<<<<<<< HEAD
 #include <QFileDialog>
+=======
+#include <QFile>
+>>>>>>> 8e74a52da19ed27e20e4fbeb12ce86621b52127a
 #include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -75,6 +79,7 @@ void MainWindow::onLogon()
 
 }
 
+<<<<<<< HEAD
 void MainWindow::on_SearchString_textEdited(const QString &arg1)
 {
     if (!arg1.trimmed().isEmpty())
@@ -84,4 +89,11 @@ void MainWindow::on_SearchString_textEdited(const QString &arg1)
 void MainWindow::on_Settings_clicked()
 {
     settings->exec();
+=======
+  group.mutable_getassetrequest()->CopyFrom(assetRequest);
+  GetAssetResponse assetResponse=session->execute(group)->getassetresponse();
+  GetAssetResponse_InstallAsset ia=assetResponse.installasset(0);
+  qDebug()<<ia.DebugString().c_str();
+  download=new Downloader(ia);
+>>>>>>> 8e74a52da19ed27e20e4fbeb12ce86621b52127a
 }
