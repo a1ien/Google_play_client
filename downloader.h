@@ -6,20 +6,21 @@
 #include <QObject>
 #include "market.pb.h"
 
-class Downloader : public QObject
-{
-  Q_OBJECT
+class Downloader : public QObject {
+Q_OBJECT
+
 public:
-  explicit Downloader(GetAssetResponse_InstallAsset const& ia, QObject *parent = 0);
-  
+    explicit Downloader(GetAssetResponse_InstallAsset const & ia, QObject * parent = 0);
+
 signals:
-  void DownloadFinish();
+    void DownloadFinish();
+
 public slots:
-  void requestComplite();
+    void requestComplite();
+
 private:
   QNetworkAccessManager manager;
-  QNetworkReply* http;
-  
+  QNetworkReply         * http;
 };
 
 #endif // DOWNLOADER_H

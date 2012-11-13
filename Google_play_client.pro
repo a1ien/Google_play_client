@@ -17,13 +17,15 @@ SOURCES += main.cpp\
     settings.cpp \
     marketsession.cpp \
     market.pb.cc \
-    downloader.cpp
+    downloader.cpp \
+    decompressor.cpp
 
 HEADERS  += mainwindow.h \
     settings.h \
     marketsession.h \
     market.pb.h \
-    downloader.h
+    downloader.h \
+    decompressor.h
 
 FORMS    += mainwindow.ui \
     settings.ui

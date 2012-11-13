@@ -11,21 +11,20 @@ namespace Ui {
   class MainWindow;
 }
 
-class MainWindow : public QMainWindow
-{
-  Q_OBJECT
+class MainWindow : public QMainWindow {
+Q_OBJECT
   
 public:
-  explicit MainWindow(QWidget *parent = 0);
-  ~MainWindow();
-public slots:
-  void onLogon();
-private:
-  Ui::MainWindow *ui;
-  Settings* settings;
-  MarketSession* session;
-  Downloader* download;
+    explicit MainWindow(QWidget * parent = 0);
+    ~MainWindow();
 
+public slots:
+    void onLogon();
+private:
+    Ui::MainWindow * ui;
+    Settings       * settings;
+    MarketSession  * session;
+    Downloader     * download;
 };
 
 #endif // MAINWINDOW_H

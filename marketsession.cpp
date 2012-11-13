@@ -6,14 +6,13 @@
 #include "zlib/zlib.h"
 #include "marketsession.h"
 #include <QDebug>
+#include "decompressor.h"
 
-MarketSession::MarketSession(QObject *parent) :
-    QObject(parent),
-    SERVICE("androidsecure"),
-    URL_LOGIN("https://www.google.com/accounts/ClientLogin")
-
+MarketSession::MarketSession(QObject * parent)
+    : QObject(parent),
+      SERVICE("androidsecure"),
+      URL_LOGIN("https://www.google.com/accounts/ClientLogin")
 {
-
     context.set_issecure(true);
     context.set_version(2009011);
     context.set_usercountry("GB");
@@ -25,21 +24,19 @@ MarketSession::MarketSession(QObject *parent) :
     context.set_simoperatornumeric("310260");
 }
 
-Response_ResponseGroup *MarketSession::execute(Request_RequestGroup requestGroup)
-{
+Response_ResponseGroup * MarketSession::execute(Request::RequestGroup requestGroup) {
     request.Clear();
     request.mutable_context()->CopyFrom(context);
     request.add_requestgroup()->CopyFrom(requestGroup);
 
-    qDebug()<<request.DebugString().c_str();
+    qDebug() << request.DebugString().c_str();
 
     QByteArray responseBytes=executeProtobuf(request);
-    r.ParseFromArray(responseBytes.constData(),responseBytes.size());
+    r.ParseFromArray(responseBytes.constData(), responseBytes.size());
     return r.mutable_responsegroup(0);
 }
 
-App MarketSession::getAppInfo(QString /*name*/)
-{
+App MarketSession::getAppInfo(QString /*name*/) {
     Request_RequestGroup group;
     AppsRequest app;
     app.set_query("pname:com.kebab.Llama");
@@ -51,8 +48,7 @@ App MarketSession::getAppInfo(QString /*name*/)
 }
 
 
-void MarketSession::login(QString email, QString password, QString androidId,QString accountType)
-{
+void MarketSession::login(QString email, QString password, QString androidId, QString accountType) {
     setAndroidId(androidId);
     QMap<QString,QString> params;
     params.insert("Email",email);
@@ -62,147 +58,87 @@ void MarketSession::login(QString email, QString password, QString androidId,QSt
     postUrl(URL_LOGIN,params);
 
 }
-void MarketSession::loginFinished()
-{
+void MarketSession::loginFinished() {
     qDebug("postURL");
     QString authKey;
-    QStringList st=QString(http->readAll()).split(QRegExp("[\n\r=]"));
-    while(!st.empty())
-    {
-        if(st.takeFirst()==QString("Auth"))
-        {
-            authKey=st.takeFirst();
+    QStringList st = QString(http->readAll()).split(QRegExp("[\n\r=]"));
+    while(!st.empty()) {
+        if(st.takeFirst() == QString("Auth")) {
+            authKey = st.takeFirst();
             break;
         }
     }
-    qDebug()<<authKey.toAscii();
+    qDebug() << authKey.toAscii();
     setAuthSubToken(authKey);
     http->deleteLater();
     emit logged();
 
 }
 
-void MarketSession::postUrl(const QString& url, QMap<QString, QString> params)
-{
-    QString data="";
-    foreach(const QString& key,params.keys())
-    {
+void MarketSession::postUrl(const QString & url, QMap< QString, QString > params) {
+    QString data = "";
+    foreach(const QString & key, params.keys()) {
         data.append(QString("&%1=%2").arg(key).arg(params.value(key)));
     }
-    data.remove(0,1);
+    data.remove(0, 1);
     QNetworkRequest req;
     req.setUrl(url);
     req.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
-    http = qnam.post(req,data.toUtf8());
-    connect(http,SIGNAL(finished()),this, SLOT(loginFinished()));
+    http = qnam.post(req, data.toUtf8());
+    connect(http, SIGNAL(finished()), this, SLOT(loginFinished()));
 }
 
+QByteArray MarketSession::executeProtobuf(Request request) {
+    QByteArray requestBytes(request.SerializeAsString().c_str(), request.ByteSize());
 
-QByteArray MarketSession::executeProtobuf(Request request)
-{
-    QByteArray requestBytes(request.SerializeAsString().c_str(),request.ByteSize());
-    QByteArray responseBytes;
-    if(!context.issecure())
-        responseBytes = executeRawHttpQuery(requestBytes);
-    else
-        responseBytes = executeRawHttpsQuery(requestBytes);
+    // QByteArray responseBytes = executeRawQuery(requestBytes);
 
-    return responseBytes;
+    return executeRawQuery(requestBytes);
 }
 
-QByteArray MarketSession::executeRawHttpQuery(const QByteArray &request)
-{
+QNetworkRequest MarketSession::setUsualHeaderSet(QUrl url) {
+    QNetworkRequest request;
+    request.setUrl(url);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+    request.setRawHeader("User-Agent", "Android-Market/2 (sapphire PLAT-RC33); gzip");
+    request.setRawHeader("Accept-Charset","ISO-8859-1,utf-8;q=0.7,*;q=0.7");
+
+    return request;
+}
+
+QByteArray MarketSession::executeRawQuery(const QByteArray & request) {
+    QString requestAddress;
+    requestAddress = (context.issecure())
+            ? "https://android.clients.google.com/market/api/ApiRequest"
+            : "http://android.clients.google.com/market/api/ApiRequest";
+
     QByteArray data;
-    QUrl url("http://android.clients.google.com/market/api/ApiRequest");
+    QUrl url(requestAddress);
     QNetworkAccessManager manager;
-    QNetworkRequest req;
-    req.setUrl(url);
+    QNetworkRequest req = setUsualHeaderSet(url);
+    /*req.setUrl(url);
     req.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
-    req.setRawHeader("Cookie",QString("ANDROID=%1").arg(authSubToken).toUtf8());
+    req.setRawHeader("Cookie", QString("ANDROID=%1").arg(authSubToken).toUtf8());
     req.setRawHeader("User-Agent", "Android-Market/2 (sapphire PLAT-RC33); gzip");
-    req.setRawHeader("Accept-Charset","ISO-8859-1,utf-8;q=0.7,*;q=0.7");
+    req.setRawHeader("Accept-Charset","ISO-8859-1,utf-8;q=0.7,*;q=0.7");*/
 
-    QString requestData=QString("version=%1&request=%2")
-            .arg(PROTOCOL_VERSION).arg(QString(request.toBase64()));
-    QNetworkReply* http = manager.post(req,requestData.toUtf8());
+    QString requestData = QString("version=%1&request=%2")
+            .arg(PROTOCOL_VERSION)
+            .arg(QString(request.toBase64()));
+    QNetworkReply * http = manager.post(req, requestData.toUtf8());
     QEventLoop eventLoop;
-    connect(http,SIGNAL(finished()),&eventLoop, SLOT(quit()));
+    connect(http, SIGNAL(finished()), & eventLoop, SLOT(quit()));
     eventLoop.exec();
-    qint32 len=http->header(QNetworkRequest::ContentLengthHeader).toUInt();
-    data=gzipDecompress(http->read(len));
+    qint32 len = http->header(QNetworkRequest::ContentLengthHeader).toUInt();
+    data = gzipDecompress(http->read(len));
     delete http;
     return data;
+
 }
 
-QByteArray MarketSession::executeRawHttpsQuery(const QByteArray &request)
-{
-    QByteArray data;
-    QUrl url("https://android.clients.google.com/market/api/ApiRequest");
-    QNetworkAccessManager manager;
-    QNetworkRequest req;
-    req.setUrl(url);
-    req.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
-    req.setRawHeader("Cookie",QString("ANDROIDSECURE=%1").arg(authSubToken).toUtf8());
-    req.setRawHeader("User-Agent", "Android-Market/2 (sapphire PLAT-RC33); gzip");
-    req.setRawHeader("Accept-Charset","ISO-8859-1,utf-8;q=0.7,*;q=0.7");
+QByteArray MarketSession::gzipDecompress(QByteArray compressData) {
+    Decompressor decompressor;
+    QByteArray decompressedData = decompressor.getDecompressedData(compressData);
 
-    QString requestData=QString("version=%1&request=%2")
-            .arg(PROTOCOL_VERSION).arg(QString(request.toBase64()));
-    QNetworkReply* http = manager.post(req,requestData.toUtf8());
-    QEventLoop eventLoop;
-    connect(http,SIGNAL(finished()),&eventLoop, SLOT(quit()));
-    eventLoop.exec();
-    data=gzipDecompress(http->read(http->header(QNetworkRequest::ContentLengthHeader).toUInt()));
-    delete http;
-    return data;
-}
-
-QByteArray MarketSession::gzipDecompress(QByteArray compressData)
-{
-    //decompress GZIP data
-    //strip header and trailer
-    compressData.remove(0, 10);
-    compressData.chop(12);
-
-    const int buffersize = 16384;
-    quint8 buffer[buffersize];
-
-    z_stream cmpr_stream;
-    cmpr_stream.next_in = (unsigned char *)compressData.data();
-    cmpr_stream.avail_in = compressData.size();
-    cmpr_stream.total_in = 0;
-
-    cmpr_stream.next_out = buffer;
-    cmpr_stream.avail_out = buffersize;
-    cmpr_stream.total_out = 0;
-
-    cmpr_stream.zalloc = Z_NULL;
-    cmpr_stream.zalloc = Z_NULL;
-
-    if( inflateInit2(&cmpr_stream, -8 ) != Z_OK) {
-        qDebug("cmpr_stream error!");
-    }
-
-    QByteArray uncompressed;
-    do {
-        int status = inflate( &cmpr_stream, Z_SYNC_FLUSH );
-
-        if(status == Z_OK || status == Z_STREAM_END) {
-            uncompressed.append(QByteArray::fromRawData(
-                                    (char *)buffer,
-                                    buffersize - cmpr_stream.avail_out));
-            cmpr_stream.next_out = buffer;
-            cmpr_stream.avail_out = buffersize;
-        } else {
-            inflateEnd(&cmpr_stream);
-        }
-
-        if(status == Z_STREAM_END) {
-            inflateEnd(&cmpr_stream);
-            break;
-        }
-
-    }while(cmpr_stream.avail_out == 0);
-
-    return uncompressed;
+    return decompressedData;
 }
