@@ -8,11 +8,11 @@ MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
   ui(new Ui::MainWindow),
   settings(new Settings(this)),
-  session(new MarketSession())
+  session(new MarketSession()),
+  downloader(new Downloader(this))
 {
 
   ui->setupUi(this);
-//  ui->SettingsButton->setIcon("toolbar-settings");
 }
 
 MainWindow::~MainWindow()
@@ -23,7 +23,8 @@ MainWindow::~MainWindow()
 void MainWindow::on_Download_clicked()
 {
     if (settings->someIsEmpty())
-        QMessageBox::information(this, tr("Your credentials are incompelete"), tr("\tNot all of your settings are specified.\n\tPlease, fill all settings fields before download."));
+
+        QMessageBox::information(this, tr("Your credentials are incompelete"), tr("\tNot all of your settings are specified.\n\n\tPlease, fill all settings fields before download."));
     else
     {
         connect(session,SIGNAL(logged()),this,SLOT(onLogon()));
@@ -32,10 +33,7 @@ void MainWindow::on_Download_clicked()
 }
 void MainWindow::onLogon()
 {
-  App app;
-  app.CopyFrom(session->getAppInfo(QString ("pname:%1").arg(ui->SearchString->text().trimmed())));
-
-  qDebug()<<app.DebugString().c_str();
+  App app=session->getAppInfo(QString ("pname:%1").arg(ui->SearchString->text().trimmed()));
 
  if (app.has_id())
   {
@@ -63,8 +61,13 @@ void MainWindow::onLogon()
          break;
      }
      ui->AppInfo->append(QString ("Type:\t%1").arg(qtype));
-     QString filename = QFileDialog::getSaveFileName(this, tr("Save File"), QString ("%1.%2.apk").arg(app.title().c_str()).arg(app.version().c_str()), tr("*.apk"));
-
+     QString fileName = QFileDialog::getSaveFileName(this,
+                                                     tr("Save File"),
+                                                     QString ("%1.%2.apk").arg(app.title().c_str()).arg(app.version().c_str()),
+                                                     tr("*.apk"));
+     if(fileName.isEmpty())
+       return;
+     downloader->DownloadFile(session->getInstallAsset(app.id().c_str()),fileName);
   }
 
 }
@@ -75,7 +78,8 @@ void MainWindow::on_SearchString_textEdited(const QString &arg1)
         ui->Download->setEnabled(true);
 }
 
-void MainWindow::on_Settings_clicked()
+
+void MainWindow::on_SettingsButton_clicked()
 {
     settings->exec();
 }

@@ -50,6 +50,15 @@ App MarketSession::getAppInfo(QString name)
     return execute(group)->mutable_appsresponse()->app(0);
 }
 
+GetAssetResponse_InstallAsset MarketSession::getInstallAsset(QString appId)
+{
+  Request_RequestGroup group;
+  GetAssetRequest assetRequest;
+  assetRequest.set_assetid(appId.toAscii());
+  group.mutable_getassetrequest()->CopyFrom(assetRequest);
+  return execute(group)->getassetresponse().installasset(0);
+}
+
 
 void MarketSession::login(QString email, QString password, QString androidId,QString accountType)
 {
