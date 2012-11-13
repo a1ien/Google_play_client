@@ -24,19 +24,21 @@ MarketSession::MarketSession(QObject * parent)
     context.set_simoperatornumeric("310260");
 }
 
-Response_ResponseGroup * MarketSession::execute(Request::RequestGroup requestGroup) {
+Response::ResponseGroup * MarketSession::execute(Request::RequestGroup requestGroup) {
     request.Clear();
     request.mutable_context()->CopyFrom(context);
     request.add_requestgroup()->CopyFrom(requestGroup);
     qDebug() << request.DebugString().c_str();
 
     QByteArray responseBytes = executeProtobuf(request);
-    r.ParseFromArray(responseBytes.constData(), responseBytes.size());
+    if (!r.ParseFromArray(responseBytes.constData(), responseBytes.size())) {
+        emit MessageSignal(ResponceParsingFailed); ///////////////////
+        return 0;
+    }
     return r.mutable_responsegroup(0);
 }
 
-App MarketSession::getAppInfo(QString name)
-{
+App MarketSession::getAppInfo(QString name) {
     Request::RequestGroup group;
     AppsRequest app;
     app.set_query(name.toAscii());
@@ -45,13 +47,18 @@ App MarketSession::getAppInfo(QString name)
 
     group.mutable_appsrequest()->CopyFrom(app);
     Response::ResponseGroup * responseGroup = execute(group);
-    AppsResponse * appResponse = responseGroup->mutable_appsresponse();
+    AppsResponse * appResponse;
+    if ((responseGroup == 0) || ((appResponse =
+            responseGroup->mutable_appsresponse()) == 0) ||
+            (appResponse->app_size() == 0)) {
+        emit MessageSignal(NoApp); ///////////////////
+        return App();
+    }
     return appResponse->app(0);
 }
 
-GetAssetResponse_InstallAsset MarketSession::getInstallAsset(QString appId)
-{
-  Request_RequestGroup group;
+GetAssetResponse::InstallAsset MarketSession::getInstallAsset(QString appId) {
+  Request::RequestGroup group;
   GetAssetRequest assetRequest;
   assetRequest.set_assetid(appId.toAscii());
   group.mutable_getassetrequest()->CopyFrom(assetRequest);
@@ -60,20 +67,20 @@ GetAssetResponse_InstallAsset MarketSession::getInstallAsset(QString appId)
 
 
 void MarketSession::login(QString email, QString password, QString androidId, QString accountType) {
-    setAndroidId(androidId);
+    setAndroidID(androidId);
     QMap<QString,QString> params;
     params.insert("Email",email);
     params.insert("Passwd", password);
     params.insert("service", SERVICE);
     params.insert("accountType", accountType);
     postUrl(URL_LOGIN, params);
-
 }
+
 void MarketSession::loginFinished() {
     qDebug("postURL");
     QString authKey;
     QStringList st = QString(http->readAll()).split(QRegExp("[\n\r=]"));
-    while(!st.empty()) {
+    while (!st.empty()) {
         if(st.takeFirst() == QString("Auth")) {
             authKey = st.takeFirst();
             break;
@@ -83,7 +90,6 @@ void MarketSession::loginFinished() {
     setAuthSubToken(authKey);
     http->deleteLater();
     emit logged();
-
 }
 
 void MarketSession::postUrl(const QString & url, QMap< QString, QString > params) {
@@ -134,7 +140,9 @@ QByteArray MarketSession::executeRawQuery(const QByteArray & request) {
     connect(http, SIGNAL(finished()), & eventLoop, SLOT(quit()));
     eventLoop.exec();
     qint32 len = http->header(QNetworkRequest::ContentLengthHeader).toUInt();
-    if (len == 0) emit MessageSignal(MessageTypes::EmptyResponce);
+    if (len == 0) {
+        emit MessageSignal(EmptyResponce);
+    }
     data = gzipDecompress(http->read(len));
     delete http;
     return data;

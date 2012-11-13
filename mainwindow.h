@@ -20,7 +20,7 @@ public:
   ~MainWindow();
 
 signals:
-    MessageSignal(MessageTypes type, QString description = "");
+    void MessageSignal(MessageTypes type, QString description = "");
 
 private slots:
     void on_Download_clicked();
@@ -31,13 +31,13 @@ private slots:
 
 public slots:
   void onLogon();
-  void messageSignalHandler(uint type, const QString description);
+  void messageSignalHandler(MessageTypes type, const QString description);
 
 private:
-  Ui::MainWindow *ui;
-  Settings* settings;
-  MarketSession* session;
-  Downloader* downloader;
+  Ui::MainWindow * ui;
+  Settings       * settings;
+  MarketSession  * session;
+  Downloader     * downloader;
 };
 
 #endif // MAINWINDOW_H

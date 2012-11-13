@@ -8,12 +8,14 @@
 
 const int PROTOCOL_VERSION = 2;
 
-namespace MessageTypes {
-    const uint
-    UnknownError   = 0,
-    EmptyResponce  = 1,
-    SettingsNotSet = 2;
-}
+enum MessageTypes {
+    UnknownError          = 0,
+    EmptyResponce         = 1,
+    SettingsNotSet        = 2,
+    NoApp                 = 3,
+    ResponceParsingFailed = 4,
+    Waiting               = 5
+};
 
 class MarketSession : public QObject {
 Q_OBJECT
@@ -22,7 +24,7 @@ public:
     explicit MarketSession(QObject *parent = 0);
 
     void login(QString email, QString password, QString androidId, QString accountType);
-    void setAndroidId(QString & androidId) {
+    void setAndroidID(QString & androidId) {
         context.set_androidid(androidId.toAscii());
     }
     void setAuthSubToken(QString authSubToken) {
@@ -47,7 +49,7 @@ private:
 
 signals:
     void logged();
-    void MessageSignal(uint type, const QString description);
+    void MessageSignal(MessageTypes type, const QString description = "");
 public slots:
 
 private slots:

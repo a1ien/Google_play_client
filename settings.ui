@@ -59,7 +59,7 @@
      <property name="title">
       <string>AndroidID</string>
      </property>
-     <widget class="QLineEdit" name="androidid">
+     <widget class="QLineEdit" name="androidID">
       <property name="geometry">
        <rect>
         <x>10</x>
