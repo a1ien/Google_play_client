@@ -31,6 +31,7 @@ private slots:
 private:
     Ui::Settings *ui;
     QSettings* settings;
+
 };
 
 #endif // SETTINGS_H

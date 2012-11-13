@@ -22,7 +22,7 @@ void Settings::on_Save_clicked()
     settings->setValue("email",ui->email->text());
     settings->setValue("password",ui->password->text());
     settings->setValue("androidid",ui->androidid->text());
-    hide();
+    close();
 }
 
 void Settings::on_Cancel_clicked()
@@ -30,5 +30,5 @@ void Settings::on_Cancel_clicked()
     ui->email->setText(settings->value("email").toString());
     ui->password->setText(settings->value("password").toString());
     ui->androidid->setText(settings->value("androidid").toString());
-    hide();
+    close();
 }

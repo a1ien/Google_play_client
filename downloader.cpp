@@ -40,15 +40,12 @@ void Downloader::requestComplite(QNetworkReply* reply)
   // If the URL is not empty, we're being redirected.
   if(!urlRedirectedTo.isEmpty())
     {
-      qDebug()<<possibleRedirectUrl;
       req.setUrl(urlRedirectedTo);
       QNetworkReply* r=manager.get(req);
       r->setProperty("fileName",reply->property("fileName"));
     }
   else
     {
-      qDebug()<<possibleRedirectUrl;
-      qDebug()<<reply->property("fileName");
       QFile file(reply->property("fileName").toString());
       file.open(QIODevice::WriteOnly);
       file.write(reply->readAll());

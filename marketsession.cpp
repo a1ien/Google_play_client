@@ -38,11 +38,11 @@ Response_ResponseGroup *MarketSession::execute(Request_RequestGroup requestGroup
     return r.mutable_responsegroup(0);
 }
 
-App MarketSession::getAppInfo(QString /*name*/)
+App MarketSession::getAppInfo(QString name)
 {
     Request_RequestGroup group;
     AppsRequest app;
-    app.set_query("pname:com.kebab.Llama");
+    app.set_query(name.toAscii());
     app.set_startindex(0);
     app.set_entriescount(10);
 
