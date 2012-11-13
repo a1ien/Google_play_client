@@ -24,7 +24,7 @@ private:
   Ui::MainWindow *ui;
   Settings* settings;
   MarketSession* session;
-  Downloader* download;
+  Downloader* downloader;
 
 };
 

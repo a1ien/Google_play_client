@@ -25,6 +25,7 @@ public:
 
     Response_ResponseGroup *execute(Request_RequestGroup  requestGroup);
     App getAppInfo(QString name);
+    GetAssetResponse_InstallAsset getInstallAsset(QString appId);
 private:
     void postUrl(const QString& url, QMap<QString, QString> params);
     QByteArray executeProtobuf(Request request);

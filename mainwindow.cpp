@@ -5,7 +5,7 @@
 
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
-  ui(new Ui::MainWindow),settings(new Settings(this)),session(new MarketSession())
+  ui(new Ui::MainWindow),settings(new Settings(this)),session(new MarketSession(this)),downloader(new Downloader(this))
 {
   ui->setupUi(this);
   connect(session,SIGNAL(logged()),this,SLOT(onLogon()));
@@ -23,18 +23,9 @@ MainWindow::~MainWindow()
 
 void MainWindow::onLogon()
 {
-  App app;
-  app.CopyFrom(session->getAppInfo(""));
+  App app=session->getAppInfo("");
 
-
-  Request_RequestGroup group;
-  GetAssetRequest assetRequest;
-  assetRequest.set_assetid(app.id());
-
-
-  group.mutable_getassetrequest()->CopyFrom(assetRequest);
-  GetAssetResponse assetResponse=session->execute(group)->getassetresponse();
-  GetAssetResponse_InstallAsset ia=assetResponse.installasset(0);
+  GetAssetResponse_InstallAsset ia=session->getInstallAsset(app.id().c_str());
   qDebug()<<ia.DebugString().c_str();
-  download=new Downloader(ia);
+  downloader->DownloadFile(ia,"some.apk");
 }
