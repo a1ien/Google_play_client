@@ -23,11 +23,12 @@ MainWindow::~MainWindow() {
 
 void MainWindow::on_Download_clicked() {
     if (settings->someIsEmpty()) {
-        // QMessageBox::information(this, "Configuration is not set.", "You should fill all the fields in the Settings section.");
+        // QMessageBox::information(this, tr("Your credentials are incompelete"),
+        //         tr("\tNot all of your settings are specified.\n\n\tPlease, fill all settings fields before download."));
         emit MessageSignal(MessageTypes::SettingsNotSet);
     }
     else {
-        connect(session, SIGNAL(logged()),this, SLOT(onLogon()));
+        connect(session, SIGNAL(logged()), this, SLOT(onLogon()));
         session->login(settings->email(), settings->password(), settings->androidID(), QString("HOSTED_OR_GOOGLE"));
     }
 }
@@ -58,6 +59,7 @@ void MainWindow::onLogon() {
              qtype = "Game";
              break;
      }
+
      ui->AppInfo->append(QString("Type:\t%1").arg(qtype));
      QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
              QString ("%1.%2.apk").arg(app.title().c_str()).arg(app.version().c_str()), tr("*.apk"));
@@ -68,18 +70,17 @@ void MainWindow::onLogon() {
     }
 }
 
-void MainWindow::on_SearchString_textEdited(const QString &arg1) {
-    if (!arg1.trimmed().isEmpty()) {
-        ui->Download->setEnabled(true);
-    }
+void MainWindow::on_SearchString_textEdited(const QString & arg1) {
+    ui->Download->setEnabled(!arg1.trimmed().isEmpty());
 }
 
-void MainWindow::on_Settings_clicked() {
+
+void MainWindow::on_SettingsButton_clicked() {
     settings->exec();
 }
 
 void MainWindow::messageSignalHandler(const QString & description) {
-    //
-    // QMessageBox::information(this, "Configuration is not set.", "You should fill all the fields in the Settings section.");
+    // QMessageBox::information(this, tr("Your credentials are incompelete"),
+    //         tr("\tNot all of your settings are specified.\n\n\tPlease, fill all settings fields before download."));
 
 }

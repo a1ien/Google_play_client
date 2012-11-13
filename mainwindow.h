@@ -3,7 +3,6 @@
 
 #include "marketsession.h"
 #include "settings.h"
-#include "emptysettingswarning.h"
 #include "market.pb.h"
 #include "downloader.h"
 #include <QMainWindow>
@@ -21,23 +20,22 @@ public:
   ~MainWindow();
 
 signals:
-    MessageSignal(MessageTypes type, QString & description = "");
+    MessageSignal(MessageTypes type, QString description = "");
 
 private slots:
     void on_Download_clicked();
 
     void on_SearchString_textEdited(const QString &arg1);
 
-    void on_Settings_clicked();
+    void on_SettingsButton_clicked();
 
 public slots:
   void onLogon();
-  void messageSignalHandler(uint type, const QString & description);
+  void messageSignalHandler(uint type, const QString description);
 
 private:
   Ui::MainWindow *ui;
   Settings* settings;
-  EmptySettingsWarning *emptySettsWarn;
   MarketSession* session;
   Downloader* downloader;
 };

@@ -47,7 +47,7 @@ private:
 
 signals:
     void logged();
-    void MessageSignal(uint type, const QString & description = "");
+    void MessageSignal(uint type, const QString description);
 public slots:
 
 private slots:
