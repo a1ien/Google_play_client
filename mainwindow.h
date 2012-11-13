@@ -3,6 +3,7 @@
 
 #include "marketsession.h"
 #include "settings.h"
+#include "downloader.h"
 #include <QMainWindow>
 
 
@@ -23,6 +24,7 @@ private:
   Ui::MainWindow *ui;
   Settings* settings;
   MarketSession* session;
+  Downloader* download;
 
 };
 

@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <QFile>
 #include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -32,5 +33,8 @@ void MainWindow::onLogon()
 
 
   group.mutable_getassetrequest()->CopyFrom(assetRequest);
-  qDebug()<<session->execute(group)->DebugString().c_str();
+  GetAssetResponse assetResponse=session->execute(group)->getassetresponse();
+  GetAssetResponse_InstallAsset ia=assetResponse.installasset(0);
+  qDebug()<<ia.DebugString().c_str();
+  download=new Downloader(ia);
 }

@@ -16,12 +16,14 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     settings.cpp \
     marketsession.cpp \
-    market.pb.cc
+    market.pb.cc \
+    downloader.cpp
 
 HEADERS  += mainwindow.h \
     settings.h \
     marketsession.h \
-    market.pb.h
+    market.pb.h \
+    downloader.h
 
 FORMS    += mainwindow.ui \
     settings.ui
