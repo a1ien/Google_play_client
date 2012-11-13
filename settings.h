@@ -5,15 +5,14 @@
 #include <QSettings>
 
 namespace Ui {
-class Settings;
+    class Settings;
 }
 
-class Settings : public QDialog
-{
-    Q_OBJECT
-    
+class Settings : public QDialog {
+Q_OBJECT
+
 public:
-    explicit Settings(QWidget *parent = 0);
+    explicit Settings(QWidget * parent = 0);
     ~Settings();
     QString email() { return settings->value("email").toString();}
     QString password() { return settings->value("password").toString();}
@@ -27,15 +26,14 @@ public:
                                 settings->value("password").toString().isEmpty() ||
                                 settings->value("androidid").toString().isEmpty();}
 
+
 private slots:
     void on_Save_clicked();
-
     void on_Cancel_clicked();
 
 private:
-    Ui::Settings *ui;
-    QSettings* settings;
-
+    Ui::Settings * ui;
+    QSettings    * settings;
 };
 
 #endif // SETTINGS_H

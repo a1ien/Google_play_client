@@ -7,21 +7,20 @@
 #include <QObject>
 #include "market.pb.h"
 
-class Downloader : public QObject
-{
-  Q_OBJECT
+class Downloader : public QObject {
+Q_OBJECT
+
 public:
   explicit Downloader(QObject *parent = 0);
   void DownloadFile(GetAssetResponse_InstallAsset const& ia,QString const &fileName);
 signals:
   void DownloadFinish(QString fileName);
 private slots:
-  void requestComplite(QNetworkReply *reply);
+  void requestComplete(QNetworkReply *reply);
 private:
   QUrl redirectUrl(const QUrl& possibleRedirectUrl, const QUrl& oldRedirectUrl) const;
   QNetworkAccessManager manager;
   QNetworkRequest req;
-  
 };
 
 #endif // DOWNLOADER_H

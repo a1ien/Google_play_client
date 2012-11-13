@@ -6,20 +6,22 @@
 #include "market.pb.h"
 #include "downloader.h"
 #include <QMainWindow>
-
+#include "marketsession.h"
 
 namespace Ui {
   class MainWindow;
 }
 
-class MainWindow : public QMainWindow
-{
-  Q_OBJECT
-  
+class MainWindow : public QMainWindow {
+Q_OBJECT
+
 public:
   explicit MainWindow(QWidget *parent = 0);
   ~MainWindow();
-  
+
+signals:
+    MessageSignal(MessageTypes type, QString description = "");
+
 private slots:
     void on_Download_clicked();
 
@@ -29,13 +31,13 @@ private slots:
 
 public slots:
   void onLogon();
+  void messageSignalHandler(uint type, const QString description);
 
 private:
   Ui::MainWindow *ui;
   Settings* settings;
   MarketSession* session;
   Downloader* downloader;
-
 };
 
 #endif // MAINWINDOW_H
