@@ -19,26 +19,34 @@
 #include <QObject>
 #include <QMap>
 #include <QtNetwork/QNetworkReply>
+#include <QVector>
 #include "market.pb.h"
 
 const int PROTOCOL_VERSION = 2;
 
 enum MessageTypes {
-    UnknownError          = 0,
-    EmptyResponce         = 1,
-    SettingsNotSet        = 2,
-    NoApp                 = 3,
-    ResponceParsingFailed = 4,
-    Waiting               = 5
+    UnknownError,
+    EmptyResponce,
+    SettingsNotSet,
+    NoApp,
+    ResponceParsingFailed,
+    Waiting,
+    BadRequest,
+    AuthorizationFailedMessagebox,
+    AuthorizationTest,
+    AuthorizationOk,
+    AuthorizationFailedNotification
 };
 
 class MarketSession : public QObject {
 Q_OBJECT
 
 public:
-    explicit MarketSession(QObject *parent = 0);
+    static MarketSession * getInstance(QObject * parent);
 
+    void login();
     void login(QString email, QString password, QString androidId, QString accountType);
+    void getApp();
     void setAndroidID(QString & androidId) {
         context.set_androidid(androidId.toAscii());
     }
@@ -57,23 +65,31 @@ public:
 
     GetAssetResponse::InstallAsset getInstallAsset(QString appId);
 private:
-    void postUrl(const QString & url, QMap<QString, QString> params);
+    explicit MarketSession(QObject *parent = 0); // private constructor
+
+    void postUrl(const QString & url, QMap< QString, QString > params);
     QByteArray executeProtobuf(Request request);
     QByteArray executeRawQuery(const QByteArray & request);
     QByteArray gzipDecompress(QByteArray compressData);
 
+    void executeWaitingTasksQuery();
+
 signals:
-    void logged();
+    void GetAppSignal();
+    void NeedToRelogin();
     void MessageSignal(MessageTypes type, const QString description = "");
 public slots:
 
 private slots:
     void loginFinished();
+    void needToReloginHandler();
 
 public:
     QString SERVICE;
 
 private:
+    typedef void (MarketSession::* Task)();
+
     const QString         URL_LOGIN;
     RequestContext        context;
     Request               request;
@@ -81,6 +97,15 @@ private:
     QString               authSubToken;
     QNetworkAccessManager qnam;
     QNetworkReply         * http;
+    QString               email;
+    QString               password;
+    QString               androidID;
+    QString               accountType;
+    QVector<Task>         waitingTaskQuery;
+    bool                  isLoggedIn;
+    bool                  isLoggingIn;
+    bool                  isAuthFailed;
+    static MarketSession  * instance;
 };
 
 #endif // MARKETSESSION_H

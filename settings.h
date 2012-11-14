@@ -18,6 +18,7 @@
 
 #include <QDialog>
 #include <QSettings>
+#include "marketsession.h"
 
 namespace Ui {
     class Settings;
@@ -47,14 +48,19 @@ public:
                                 settings->value("password").toString().isEmpty() ||
                                 settings->value("androidid").toString().isEmpty();}
 
+
     QSettings & getSettings() { return *settings;}
+signals:
+    void NeedToRelogin();
+
 private slots:
     void on_Save_clicked();
     void on_Cancel_clicked();
 
 private:
-    Ui::Settings * ui;
-    QSettings    * settings;
+    Ui::Settings  * ui;
+    QSettings     * settings;
+    MarketSession * session;
 };
 
 #endif // SETTINGS_H

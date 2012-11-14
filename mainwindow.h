@@ -45,7 +45,7 @@ private slots:
     void on_SettingsButton_clicked();
 
 public slots:
-  void onLogon();
+  void getAppSignalHandler();
   void messageSignalHandler(MessageTypes type, const QString description);
 
 private:

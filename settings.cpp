@@ -18,8 +18,10 @@
 
 Settings::Settings(QWidget * parent)
     : QDialog(parent),
-      ui(new Ui::Settings)
+      ui(new Ui::Settings),
+      session(MarketSession::getInstance(this))
 {
+    QObject::connect(this, SIGNAL(NeedToRelogin()), session, SLOT(needToReloginHandler()));
     ui->setupUi(this);
     settings = new QSettings("config.ini", QSettings::IniFormat, this);
     ui->email->setText(settings->value("email").toString());
@@ -29,7 +31,7 @@ Settings::Settings(QWidget * parent)
     ui->language->setText(settings->value("language").toString());
     ui->operatorSym->setText(settings->value("operator").toString());
     ui->operatorNum->setText(settings->value("operatorNum").toString());
-
+    emit NeedToRelogin();
 }
 
 Settings::~Settings() {
@@ -46,6 +48,8 @@ void Settings::on_Save_clicked()
     settings->setValue("operator",ui->operatorSym->text());
     settings->setValue("operatorNum",ui->operatorNum->text());
     close();
+    emit NeedToRelogin();
+    session->login(ui->email->text(), ui->password->text(), ui->androidID->text(), QString("HOSTED_OR_GOOGLE"));
 }
 
 void Settings::on_Cancel_clicked() {

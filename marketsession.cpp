@@ -23,6 +23,8 @@
 #include <QDebug>
 #include "decompressor.h"
 
+MarketSession * MarketSession::instance = 0;
+
 MarketSession::MarketSession(QObject * parent)
     : QObject(parent),
       SERVICE("androidsecure"),
@@ -37,9 +39,21 @@ MarketSession::MarketSession(QObject * parent)
     context.set_simoperatoralpha("T-Mobile");
     context.set_operatornumeric("310260");
     context.set_simoperatornumeric("310260");
+
+    this->isLoggedIn = false;
+    this->isAuthFailed = false;
+    this->isLoggingIn = false;
+}
+
+MarketSession * MarketSession::getInstance(QObject * parent) {
+    if (MarketSession::instance == 0) {
+        MarketSession::instance = new MarketSession(parent);
+    }
+    return MarketSession::instance;
 }
 
 Response::ResponseGroup * MarketSession::execute(Request::RequestGroup requestGroup) {
+    qDebug() << "\nCALL: MarketSession::execute(Request::RequestGroup)";
     request.Clear();
     request.mutable_context()->CopyFrom(context);
     request.add_requestgroup()->CopyFrom(requestGroup);
@@ -48,7 +62,8 @@ Response::ResponseGroup * MarketSession::execute(Request::RequestGroup requestGr
     QByteArray responseBytes = executeProtobuf(request);
     qDebug()<<responseBytes;
     r.Clear();
-    if (!r.ParseFromArray(responseBytes.constData(), responseBytes.size())) {
+    if (!r.ParseFromArray(responseBytes.constData(), responseBytes.size()) ||
+            (r.mutable_responsegroup()->size() == 0)) {
         emit MessageSignal(ResponceParsingFailed); ///////////////////
         return 0;
     }
@@ -57,6 +72,7 @@ Response::ResponseGroup * MarketSession::execute(Request::RequestGroup requestGr
 }
 
 App MarketSession::getAppInfo(QString name) {
+    qDebug() << "\nCALL: MarketSession::getAppInfo(QString)";
     Request::RequestGroup group;
     AppsRequest app;
     app.set_query(name.toAscii());
@@ -76,41 +92,103 @@ App MarketSession::getAppInfo(QString name) {
 }
 
 GetAssetResponse::InstallAsset MarketSession::getInstallAsset(QString appId) {
-  Request::RequestGroup group;
-  GetAssetRequest assetRequest;
-  assetRequest.set_assetid(appId.toAscii());
-  group.mutable_getassetrequest()->CopyFrom(assetRequest);
-  return execute(group)->getassetresponse().installasset(0);
+    qDebug() << "\nCALL: MarketSession::getInstallAsses(QString)";
+    Request::RequestGroup group;
+    GetAssetRequest assetRequest;
+    assetRequest.set_assetid(appId.toAscii());
+    group.mutable_getassetrequest()->CopyFrom(assetRequest);
+    return execute(group)->getassetresponse().installasset(0);
 }
 
+void MarketSession::login() {
+    qDebug() << "\nCALL: MarketSession::login()";
+    if ((this->email.isEmpty()) || (this->password.isEmpty()) ||
+            (this->androidID.isEmpty()) || (this->accountType.isEmpty())) {
+        emit MessageSignal(SettingsNotSet);
+    }
+    this->login(this->email, this->password, this->androidID, this->accountType);
+}
 
 void MarketSession::login(QString email, QString password, QString androidId, QString accountType) {
+    qDebug() << "\nCALL: MarketSession::login(QString, QString, QString, QString)";
+    if (this->isLoggedIn) {
+        return;
+    }
+    this->isLoggingIn = true;
     setAndroidID(androidId);
+    this->email       = email;
+    this->password    = password;
+    this->androidID   = androidId;
+    this->accountType = accountType;
     QMap<QString,QString> params;
     params.insert("Email",email);
     params.insert("Passwd", password);
     params.insert("service", SERVICE);
     params.insert("accountType", accountType);
+    qDebug() << QString("Login: {\n\temail: %1\n\tservice: %2\n}\n").arg(email, SERVICE);
+    emit MessageSignal(AuthorizationTest);
     postUrl(URL_LOGIN, params);
 }
 
 void MarketSession::loginFinished() {
+    qDebug() << "\nCALL: MarketSession::loginFinished()";
     qDebug("postURL");
     QString authKey;
     QStringList st = QString(http->readAll()).split(QRegExp("[\n\r=]"));
+    qDebug() << st.size();
     while (!st.empty()) {
-        if(st.takeFirst() == QString("Auth")) {
+        if (st.takeFirst() == QString("Auth")) {
             authKey = st.takeFirst();
             break;
         }
     }
-    qDebug() << authKey.toAscii();
-    setAuthSubToken(authKey);
-    http->deleteLater();
-    emit logged();
+    if (authKey.isEmpty()) {
+        emit MessageSignal(AuthorizationFailedMessagebox);
+        emit MessageSignal(AuthorizationFailedNotification);
+        isLoggedIn = false;
+        this->isAuthFailed = true;
+    }
+    else {
+        qDebug() << authKey.toAscii();
+        setAuthSubToken(authKey);
+        http->deleteLater();
+        this->isLoggedIn = true;
+        this->isAuthFailed = false;
+        MessageSignal(AuthorizationOk);
+    }
+    this->isLoggingIn = false;
+    this->executeWaitingTasksQuery();
+}
+
+void MarketSession::executeWaitingTasksQuery() {
+    while (!this->waitingTaskQuery.empty()) {
+        Task task = this->waitingTaskQuery.front();
+        this->waitingTaskQuery.pop_front();
+        (this->*task)();
+    }
+}
+
+void MarketSession::getApp() {
+    qDebug() << "\nCALL: MarketSession::getApp()";
+    if (!isLoggedIn && !this->isAuthFailed) {
+        if (!this->isLoggingIn) {
+            this->login();
+        }
+        else {
+            this->waitingTaskQuery.push_back(&MarketSession::getApp);
+        }
+    }
+    else if (this->isLoggedIn) {
+        emit GetAppSignal();
+    }
+    else {
+        emit MessageSignal(AuthorizationFailedMessagebox);
+        emit MessageSignal(AuthorizationFailedNotification);
+    }
 }
 
 void MarketSession::postUrl(const QString & url, QMap< QString, QString > params) {
+    qDebug() << "\nCALL: MarketSession::postUrl(const Qstring &, QMap)";
     QString data = "";
     foreach(const QString & key, params.keys()) {
         data.append(QString("&%1=%2").arg(key).arg(params.value(key)));
@@ -124,12 +202,14 @@ void MarketSession::postUrl(const QString & url, QMap< QString, QString > params
 }
 
 QByteArray MarketSession::executeProtobuf(Request request) {
+    qDebug() << "\nCALL: MarketSession::executeProtobuf(Request)";
     QByteArray requestBytes(request.SerializeAsString().c_str(), request.ByteSize());
     // QByteArray responseBytes = executeRawQuery(requestBytes);
     return executeRawQuery(requestBytes);
 }
 
 QNetworkRequest MarketSession::setUsualHeaderSet(QUrl url) {
+    qDebug() << "\nCALL: MarketSession::setUsualHeaderSet(QUrl)";
     QNetworkRequest request;
     request.setUrl(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
@@ -140,6 +220,7 @@ QNetworkRequest MarketSession::setUsualHeaderSet(QUrl url) {
 }
 
 QByteArray MarketSession::executeRawQuery(const QByteArray & request) {
+    qDebug() << "\nCALL: MarketSession::executeRawQuery(QByteArray &)";
     QString requestAddress;
     requestAddress = (context.issecure())
             ? "https://android.clients.google.com/market/api/ApiRequest"
@@ -157,19 +238,31 @@ QByteArray MarketSession::executeRawQuery(const QByteArray & request) {
     QEventLoop eventLoop;
     connect(http, SIGNAL(finished()), & eventLoop, SLOT(quit()));
     eventLoop.exec();
-    qint32 len = http->header(QNetworkRequest::ContentLengthHeader).toUInt();
-    if (len == 0) {
-        emit MessageSignal(EmptyResponce);
+    if (http->error() == QNetworkReply::NoError) {
+        qint32 len = http->header(QNetworkRequest::ContentLengthHeader).toUInt();
+        if (len == 0) {
+            emit MessageSignal(EmptyResponce);
+        }
+        data = gzipDecompress(http->read(len));
+        delete http;
+        return data;
     }
-    data = gzipDecompress(http->read(len));
-    delete http;
-    return data;
-
+    else {
+        emit MessageSignal(BadRequest);
+        return QByteArray();
+    }
 }
 
 QByteArray MarketSession::gzipDecompress(QByteArray compressData) {
+    qDebug() << "\nCALL: MarketSession::gzipDecompress(QByteArray)";
     Decompressor decompressor;
     QByteArray decompressedData = decompressor.getDecompressedData(compressData);
 
     return decompressedData;
+}
+
+void MarketSession::needToReloginHandler() {
+    qDebug() << "\nCALL: MarketSession: needToReloginHandler()";
+    this->isLoggedIn = false;
+    qDebug() << "\nSIGNAL: NeedToRelogin;\nHANDLER: MarketSession::needToLoginHandler()\n";
 }
