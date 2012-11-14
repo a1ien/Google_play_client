@@ -56,5 +56,22 @@
  <resources>
   <include location="resource.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>SearchString</sender>
+   <signal>returnPressed()</signal>
+   <receiver>Download</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>350</x>
+     <y>25</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>496</x>
+     <y>23</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
