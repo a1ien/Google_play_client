@@ -24,7 +24,7 @@ Downloader::Downloader(QObject *parent) :
     connect(&manager,SIGNAL(finished(QNetworkReply*)),this, SLOT(requestComplete(QNetworkReply *)));
 }
 
-void Downloader::DownloadFile(const GetAssetResponse_InstallAsset &ia, const QString &fileName)
+void Downloader::DownloadFile(const GetAssetResponse::InstallAsset &ia, const QString &fileName)
 {
     QUrl url(ia.bloburl().c_str());
     req = MarketSession::setUsualHeaderSet(url);

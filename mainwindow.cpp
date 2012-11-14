@@ -23,13 +23,15 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
       ui(new Ui::MainWindow),
       settings(new Settings(this)),
-      session(new MarketSession()),
+      session(MarketSession::getInstance(this)),
       downloader(new Downloader(this))
 {
     ui->setupUi(this);
     connect(session, SIGNAL(MessageSignal(MessageTypes, QString)), this, SLOT(messageSignalHandler(MessageTypes, QString)));
     connect(this, SIGNAL(MessageSignal(MessageTypes, QString)), this, SLOT(messageSignalHandler(MessageTypes, QString)));
-    connect(session, SIGNAL(logged()), this, SLOT(onLogon()));
+    connect(session, SIGNAL(GetAppSignal()), this, SLOT(getAppSignalHandler()));
+
+    session->login(settings->email(), settings->password(), settings->androidID(), QString("HOSTED_OR_GOOGLE"));
 }
 
 MainWindow::~MainWindow() {
@@ -44,10 +46,12 @@ void MainWindow::on_Download_clicked() {
     }
     else {
         session->login(settings->email(), settings->password(), settings->androidID(), QString("HOSTED_OR_GOOGLE"));
+        session->getApp();
     }
 }
 
-void MainWindow::onLogon() {
+void MainWindow::getAppSignalHandler() {
+    qDebug() << "\nCALL: MainWindow::getAppSignalHandler()";
     App app = session->getAppInfo(QString("pname:%1").arg(ui->SearchString->text().trimmed()));
 
     if (app.has_id()) {
@@ -94,6 +98,7 @@ void MainWindow::on_SettingsButton_clicked() {
 }
 
 void MainWindow::messageSignalHandler(MessageTypes type, const QString description) {
+    qDebug() << "\nCALL: MainWindow::messageSignalHandler()";
     // QMessageBox::information(this, tr("Your credentials are incompelete"),
     //         tr("\tNot all of your settings are specified.\n\n\tPlease, fill all settings fields before download."));
     QString text   = "",
@@ -122,10 +127,28 @@ void MainWindow::messageSignalHandler(MessageTypes type, const QString descripti
         case Waiting:
             text = "Waiting for your response completion...";
             break;
-        /*default:
+        case BadRequest:
+            text = "Bad request.";
+            break;
+        case AuthorizationFailedMessagebox:
+            text = "Authorization failed. Check your email and password in the settings.";
+            displayInMessageBox = true;
+            break;
+        case AuthorizationFailedNotification:
+            text = "Authorization failed, change your settings please.";
+        break;
+        case AuthorizationTest:
+            text = "Trying to log in, wait please...";
+            break;
+        case AuthorizationOk:
+            text = "Logged in.";
+            break;
+        default:
             text = "The message handler has got a message that is not supported yet."
-                    "\nPlease contact the developer team.";*/
+                    "\nPlease contact the developer team.";
     }
+    qDebug() << QString("messageSignalHandler: {\n\ttype: %1\n\tdescription: %2"
+                "\n\ttext = %3\n}\n").arg(QString(type + '0'), description, text);
     if (displayInMessageBox) {
         QMessageBox::information(this, header, text);
     }
