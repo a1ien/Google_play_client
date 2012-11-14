@@ -24,29 +24,41 @@
 
 const int PROTOCOL_VERSION = 2;
 
+// Allowed message types
+// for MessageSignal / messageSignalHandler
 enum MessageTypes {
-    UnknownError,
-    EmptyResponce,
-    SettingsNotSet,
-    NoApp,
-    ResponceParsingFailed,
-    Waiting,
-    BadRequest,
-    AuthorizationFailedMessagebox,
-    AuthorizationTest,
-    AuthorizationOk,
-    AuthorizationFailedNotification
+    UnknownError,                    // The type of any error which is not listed here
+    EmptyResponce,                   // The response is empty
+    SettingsNotSet,                  // Settings were not set
+    NoApp,                           // No such application in Google Play
+    ResponceParsingFailed,           // Cannot parse the response
+    Waiting,                         // Waiting for operation completion
+    BadRequest,                      // Bad request
+    AuthorizationFailedMessagebox,   // Authorization failed (wrong email / password)
+                                     //  -- message should be shown in the MessageBox
+    AuthorizationFailedNotification, // Authorization failed (wrong email / password)
+                                     //  -- message should be shown in the notification area
+    AuthorizationTest,               // Authorization try
+    AuthorizationOk                  // User has been authorized successfully
 };
 
+// Market session ~singletone class
 class MarketSession : public QObject {
 Q_OBJECT
 
 public:
+    // This method returns the single instance
     static MarketSession * getInstance(QObject * parent);
 
+    // login() method overloads:
     void login();
+    // accountType should be QString("HOSTED_OR_GOOGLE") by default
     void login(QString email, QString password, QString androidId, QString accountType);
+
+    // App downloader initialization method
     void getApp();
+
+    // Setters, getters
     void setAndroidID(QString & androidId) {
         context.set_androidid(androidId.toAscii());
     }
@@ -58,14 +70,21 @@ public:
         return authSubToken;
     }
 
+    // Responce executor
     Response::ResponseGroup * execute(Request::RequestGroup requestGroup);
+
+    // This method returns the apk description
     App getAppInfo(QString name);
 
+    // Static method to set commonly used headers
     static QNetworkRequest setUsualHeaderSet(QUrl url);
 
     GetAssetResponse::InstallAsset getInstallAsset(QString appId);
+
 private:
-    explicit MarketSession(QObject *parent = 0); // private constructor
+    // Private constructor
+    explicit MarketSession(QObject *parent = 0);
+
 
     void postUrl(const QString & url, QMap< QString, QString > params);
     QByteArray executeProtobuf(Request request);

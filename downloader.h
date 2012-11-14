@@ -22,20 +22,28 @@
 #include <QObject>
 #include "market.pb.h"
 
+// The apk file downloader class
 class Downloader : public QObject {
 Q_OBJECT
 
 public:
-  explicit Downloader(QObject *parent = 0);
-  void DownloadFile(GetAssetResponse_InstallAsset const& ia,QString const &fileName);
+    explicit Downloader(QObject * parent = 0);
+    // This method can be used to download an apk file
+    void DownloadFile(GetAssetResponse::InstallAsset const & ia, QString const & fileName);
+
 signals:
-  void DownloadFinish(QString fileName);
+    // This signal is usually sent when download is finished
+    void DownloadFinish(QString fileName);
+
 private slots:
-  void requestComplete(QNetworkReply *reply);
+    // This slot is usually used when request is finished
+    void requestComplete(QNetworkReply * reply);
+
 private:
-  QUrl redirectUrl(const QUrl& possibleRedirectUrl, const QUrl& oldRedirectUrl) const;
-  QNetworkAccessManager manager;
-  QNetworkRequest req;
+    // Google doesn't gives a direct link to a file, it uses a redirection
+    QUrl redirectUrl(const QUrl & possibleRedirectUrl, const QUrl & oldRedirectUrl) const;
+    QNetworkAccessManager manager;
+    QNetworkRequest req;
 };
 
 #endif // DOWNLOADER_H
