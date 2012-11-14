@@ -19,7 +19,8 @@
 #include "zlib/zlib.h"
 #include <QByteArray>
 
-static const unsigned char gz_magic[2] = {0x1f, 0x8b}; // gzip magic header
+// gzip header
+static const unsigned char gz_magic[2] = {0x1f, 0x8b};
 
 #define HEAD_CRC     0x02 // bit 1 set: header CRC present
 #define EXTRA_FIELD  0x04 // bit 2 set: extra field present
@@ -28,15 +29,21 @@ static const unsigned char gz_magic[2] = {0x1f, 0x8b}; // gzip magic header
 #define RESERVED     0xE0 // bits 5..7: reserved
 #define CHUNK 16384
 
+// Decompressor class
+// It performs unzip operation with the given QByteArray
 class Decompressor {
 public:
     Decompressor();
 
+    // This method performs the unzip operation
     QByteArray getDecompressedData(QByteArray & compressData);
 
 private:
+    // Zip header checker
     bool gzipCheckHeader(QByteArray & content, int & pos);
+    // Partial unzip
     int  gunzipBodyPartially(QByteArray & compressed, QByteArray &inflated);
+    // Unzip of appendix
     void gunzipBodyPartiallyEnd();
 
     bool initInflate;

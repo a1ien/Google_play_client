@@ -15,11 +15,10 @@
 
 #include "decompressor.h"
 
-Decompressor::Decompressor() {
-    // Decompressor::inflateStrm;
-    initInflate = false;
-    streamEnd = false;
-}
+Decompressor::Decompressor()
+    : initInflate(false),
+      streamEnd(false)
+    {}
 
 QByteArray Decompressor::getDecompressedData(QByteArray & compressData) {
     // decompress the data

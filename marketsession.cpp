@@ -78,6 +78,7 @@ App MarketSession::getAppInfo(QString name) {
     app.set_query(name.toAscii());
     app.set_startindex(0);
     app.set_entriescount(10);
+    app.set_withextendedinfo(true);
 
     group.mutable_appsrequest()->CopyFrom(app);
     Response::ResponseGroup * responseGroup = execute(group);
@@ -107,6 +108,23 @@ void MarketSession::login() {
         emit MessageSignal(SettingsNotSet);
     }
     this->login(this->email, this->password, this->androidID, this->accountType);
+}
+
+void MarketSession::searcheApp(const QString &query)
+{
+  Request::RequestGroup group;
+  AppsRequest app;
+  app.set_query(query.toAscii());
+  app.set_startindex(0);
+  app.set_ordertype(AppsRequest_OrderType_FEATURED);
+  app.set_entriescount(10);
+
+  group.mutable_appsrequest()->CopyFrom(app);
+  Response::ResponseGroup * responseGroup = execute(group);
+  if (responseGroup == 0) {
+      emit MessageSignal(NoApp); ///////////////////
+  }
+  emit SearcheComplite(responseGroup->appsresponse());
 }
 
 void MarketSession::login(QString email, QString password, QString androidId, QString accountType) {
