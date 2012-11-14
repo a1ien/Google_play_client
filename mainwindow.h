@@ -21,6 +21,8 @@
 #include "market.pb.h"
 #include "downloader.h"
 #include <QMainWindow>
+#include <QTableWidget>
+#include <QTimer>
 #include "marketsession.h"
 
 namespace Ui {
@@ -45,17 +47,29 @@ private slots:
     // Handler for a Settings button click event
     void on_SettingsButton_clicked();
 
+    void autoSuggest();
+
 public slots:
     // Handler for an application downloader signal
     void getAppSignalHandler();
     // Handler for an application message (ipc) signal
     void messageSignalHandler(MessageTypes type, const QString description);
 
+    void AppsResponseHeandle(AppsResponse response);
+
+
 private:
-    Ui::MainWindow * ui;         // GUI parts
-    Settings       * settings;   // INI Settings
-    MarketSession  * session;    // MarketSession instance
-    Downloader     * downloader; // Downloader instance
+  void setupSuggest();
+  void showCompletion(QList< QPair<QString,QString> >const& data);
+  bool eventFilter(QObject *obj, QEvent * ev);
+  void doneCompletion();
+
+  Ui::MainWindow * ui;         // GUI parts
+  Settings       * settings;   // INI Settings
+  MarketSession  * session;    // MarketSession instance
+  Downloader     * downloader; // Downloader instance
+  QTableWidget   * suggest;
+  QTimer         * timer;
 };
 
 #endif // MAINWINDOW_H

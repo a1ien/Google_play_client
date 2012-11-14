@@ -81,6 +81,8 @@ public:
 
     GetAssetResponse::InstallAsset getInstallAsset(QString appId);
 
+    void searcheApp(QString const& query);
+
 private:
     // Private constructor
     explicit MarketSession(QObject *parent = 0);
@@ -97,6 +99,7 @@ signals:
     void GetAppSignal();
     void NeedToRelogin();
     void MessageSignal(MessageTypes type, const QString description = "");
+    void SearcheComplite(AppsResponse);
 public slots:
 
 private slots:
