@@ -46,6 +46,7 @@ Response::ResponseGroup * MarketSession::execute(Request::RequestGroup requestGr
     qDebug() << request.DebugString().c_str();
 
     QByteArray responseBytes = executeProtobuf(request);
+    r.Clear();
     if (!r.ParseFromArray(responseBytes.constData(), responseBytes.size())) {
         emit MessageSignal(ResponceParsingFailed); ///////////////////
         return 0;

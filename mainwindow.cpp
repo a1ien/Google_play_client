@@ -29,6 +29,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     connect(session, SIGNAL(MessageSignal(MessageTypes, QString)), this, SLOT(messageSignalHandler(MessageTypes, QString)));
     connect(this, SIGNAL(MessageSignal(MessageTypes, QString)), this, SLOT(messageSignalHandler(MessageTypes, QString)));
+    connect(session, SIGNAL(logged()), this, SLOT(onLogon()));
 }
 
 MainWindow::~MainWindow() {
@@ -42,7 +43,6 @@ void MainWindow::on_Download_clicked() {
         emit MessageSignal(SettingsNotSet);
     }
     else {
-        connect(session, SIGNAL(logged()), this, SLOT(onLogon()));
         session->login(settings->email(), settings->password(), settings->androidID(), QString("HOSTED_OR_GOOGLE"));
     }
 }
@@ -131,7 +131,7 @@ void MainWindow::messageSignalHandler(MessageTypes type, const QString descripti
     }
     else {
         ui->AppInfo->clear();
-        ui->AppInfo->append("Message");
+        ui->AppInfo->append(text);
     }
     if (appIsDead) {
         QCoreApplication::exit(type);

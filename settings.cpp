@@ -29,6 +29,7 @@ Settings::Settings(QWidget * parent)
     ui->language->setText(settings->value("language").toString());
     ui->operatorSym->setText(settings->value("operator").toString());
     ui->operatorNum->setText(settings->value("operatorNum").toString());
+
 }
 
 Settings::~Settings() {
