@@ -23,30 +23,30 @@
 #include <QFileInfo>
 
 MainWindow::MainWindow(QWidget *parent)
-  : QMainWindow(parent),
-    ui(new Ui::MainWindow),
-    settings(new Settings(this)),
-    session(MarketSession::getInstance(this)),
-    downloader(new Downloader(this)),
-    suggest(new QTableWidget(this)),
-    timer(new QTimer(this))
+    : QMainWindow(parent),
+      ui(new Ui::MainWindow),
+      settings(new Settings(this)),
+      session(MarketSession::getInstance(this)),
+      downloader(new Downloader(this)),
+      suggest(new QTableWidget(this)),
+      timer(new QTimer(this))
 {
     ui->setupUi(this);
     connect(session, SIGNAL(MessageSignal(MessageTypes, QString)), this, SLOT(messageSignalHandler(MessageTypes, QString)));
     connect(this, SIGNAL(MessageSignal(MessageTypes, QString)), this, SLOT(messageSignalHandler(MessageTypes, QString)));
     connect(session, SIGNAL(GetAppSignal()), this, SLOT(getAppSignalHandler()));
-  setupSuggest();
-  timer->setSingleShot(true);
-  timer->setInterval(1000);
-  connect(timer, SIGNAL(timeout()), SLOT(autoSuggest()));
-  connect(ui->SearchString, SIGNAL(textEdited(QString)), timer, SLOT(start()));
-  connect(session,SIGNAL(SearcheComplite(AppsResponse)),SLOT(AppsResponseHeandle(AppsResponse)));
+    setupSuggest();
+    timer->setSingleShot(true);
+    timer->setInterval(1000);
+    connect(timer, SIGNAL(timeout()), SLOT(autoSuggest()));
+    connect(ui->SearchString, SIGNAL(textEdited(QString)), timer, SLOT(start()));
+    connect(session,SIGNAL(SearcheComplite(AppsResponse)),SLOT(AppsResponseHeandle(AppsResponse)));
 
-  session->login(settings->email(), settings->password(), settings->androidID(), QString("HOSTED_OR_GOOGLE"));
+    session->login(settings->email(), settings->password(), settings->androidID(), QString("HOSTED_OR_GOOGLE"));
 }
 
 MainWindow::~MainWindow() {
-  delete ui;
+    delete ui;
 }
 
 void MainWindow::on_Download_clicked() {
@@ -68,56 +68,56 @@ void MainWindow::getAppSignalHandler() {
         ui->AppInfo->append(QString("Title:\t%1").arg(app.title().c_str()));
         ui->AppInfo->append(QString("Version:\t%1").arg(app.version().c_str()));
         ui->AppInfo->append(QString("Rating:\t%1").arg(app.rating().c_str()));
-     QString qtype;
-     switch(app.apptype()) {
-         case 0:
-             qtype = "None";
-             break;
-         case 1:
-             qtype = "Application";
-             break;
-         case 2:
-             qtype = "Ringtone";
-             break;
-         case 3:
-             qtype = "Wallpaper";
-             break;
-         case 4:
-             qtype = "Game";
-             break;
-     }
+        QString qtype;
+        switch(app.apptype()) {
+        case 0:
+            qtype = "None";
+            break;
+        case 1:
+            qtype = "Application";
+            break;
+        case 2:
+            qtype = "Ringtone";
+            break;
+        case 3:
+            qtype = "Wallpaper";
+            break;
+        case 4:
+            qtype = "Game";
+            break;
+        }
 
-     ui->AppInfo->append(QString("Type:\t%1").arg(qtype));
+        ui->AppInfo->append(QString("Type:\t%1").arg(qtype));
 
 
-     if(app.has_extendedinfo())
-         {
-           if(app.extendedinfo().has_description())
-             ui->AppInfo->append(QString("Description:\t%1").arg(app.extendedinfo().description().c_str()));
-         }
+        if(app.has_extendedinfo())
+        {
+            if(app.extendedinfo().has_description())
+                ui->AppInfo->append(QString("Description:\t%1").arg(app.extendedinfo().description().c_str()));
+        }
 
-     if(settings->getSettings().value("currentDir").toString().isEmpty())
-         settings->getSettings().setValue("currentDir", QDir ::currentPath());
+        if(settings->getSettings().value("currentDir").toString().isEmpty())
+            settings->getSettings().setValue("currentDir", QDir ::currentPath());
 
-     QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
-                                                   QString ("%3/%1.%2.apk").arg(app.title().c_str()).arg(app.version().c_str()).arg(settings->getSettings().value("currentDir").toString()),
-                                                   tr("*.apk"));
-     if(!fileName.isEmpty())
-        settings->getSettings().setValue("currentDir", QFileInfo (fileName).absolutePath());
-     else
-         return;
+        QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
+                                                        QString ("%3/%1.%2.apk").arg(app.title().c_str()).arg(app.version().c_str()).arg(settings->getSettings().value("currentDir").toString()),
+                                                        tr("*.apk"));
+        if(!fileName.isEmpty())
+            settings->getSettings().setValue("currentDir", QFileInfo (fileName).absolutePath());
+        else
+            return;
 
-     downloader->DownloadFile(session->getInstallAsset(app.id().c_str()), fileName);
+        downloader->DownloadFile(session->getInstallAsset(app.id().c_str()), fileName);
     }
 }
 
 void MainWindow::on_SearchString_textEdited(const QString & arg1) {
-  ui->Download->setEnabled(!arg1.trimmed().isEmpty());
+    ui->Download->setEnabled(!arg1.trimmed().isEmpty());
 }
 
 
 void MainWindow::on_SettingsButton_clicked() {
-  settings->exec();
+    settings->exec();
 }
 
 void MainWindow::messageSignalHandler(MessageTypes type, const QString description) {
@@ -125,193 +125,193 @@ void MainWindow::messageSignalHandler(MessageTypes type, const QString descripti
     QString text   = "",
             header = "";
     bool appIsDead           = false,
-         displayInMessageBox = false;
+            displayInMessageBox = false;
     switch (type) {
-        case EmptyResponce:
-            text = "Response contains no data.";
-            break;
-        case NoApp:
-            text = "Requested package is not found.";
-            break;
-        case ResponceParsingFailed:
-            text = "Response has incorrect format and cannot be parsed";
-            break;
-        case SettingsNotSet:
-            text = "\tNot all of required settings are specified."
-                    "\n\nPlease, check e-mail, password and android ID in Settings window.";
-            header = "Incomplete credentials";
-            displayInMessageBox = true;
-            break;
-        case UnknownError:
-            text = "Unknown error occured. Send this info to developers, please:\n" + description;
-            break;
-        case Waiting:
-            text = "Waiting for your response completion...";
-            break;
-        case BadRequest:
-            text = "Bad request.";
-            break;
-        case AuthorizationFailedMessagebox:
-            text = "Authorization failed. Check your email and password in the settings.";
-            displayInMessageBox = true;
-            break;
-        case AuthorizationFailedNotification:
-            text = "Authorization failed, change your settings please.";
+    case EmptyResponce:
+        text = "Response contains no data.";
         break;
-        case AuthorizationTest:
-            text = "Trying to log in, wait please...";
-            break;
-        case AuthorizationOk:
-            text = "Logged in.";
-            break;
-        default:
-            text = "The message handler has got a message that is not supported yet."
-                    "\nPlease contact the developer team.";
+    case NoApp:
+        text = "Requested package is not found.";
+        break;
+    case ResponceParsingFailed:
+        text = "Response has incorrect format and cannot be parsed";
+        break;
+    case SettingsNotSet:
+        text = "\tNot all of required settings are specified."
+                "\n\nPlease, check e-mail, password and android ID in Settings window.";
+        header = "Incomplete credentials";
+        displayInMessageBox = true;
+        break;
+    case UnknownError:
+        text = "Unknown error occured. Send this info to developers, please:\n" + description;
+        break;
+    case Waiting:
+        text = "Waiting for your response completion...";
+        break;
+    case BadRequest:
+        text = "Bad request.";
+        break;
+    case AuthorizationFailedMessagebox:
+        text = "Authorization failed. Check your email and password in the settings.";
+        displayInMessageBox = true;
+        break;
+    case AuthorizationFailedNotification:
+        text = "Authorization failed, change your settings please.";
+        break;
+    case AuthorizationTest:
+        text = "Trying to log in, wait please...";
+        break;
+    case AuthorizationOk:
+        text = "Logged in.";
+        break;
+    default:
+        text = "The message handler has got a message that is not supported yet."
+                "\nPlease contact the developer team.";
     }
     qDebug() << QString("messageSignalHandler: {\n\ttype: %1\n\tdescription: %2"
-                "\n\ttext = %3\n}\n").arg(QString(type + '0'), description, text);
-  if (displayInMessageBox) {
-      QMessageBox::information(this, header, text);
+                        "\n\ttext = %3\n}\n").arg(QString(type + '0'), description, text);
+    if (displayInMessageBox) {
+        QMessageBox::information(this, header, text);
     }
-  else {
-      ui->AppInfo->clear();
-      ui->AppInfo->append(text);
+    else {
+        ui->AppInfo->clear();
+        ui->AppInfo->append(text);
     }
-  if (appIsDead) {
-      QCoreApplication::exit(type);
+    if (appIsDead) {
+        QCoreApplication::exit(type);
     }
 }
 
 void MainWindow::autoSuggest()
 {
-  if(!ui->SearchString->text().startsWith("pname:",Qt::CaseSensitive))
-    session->searcheApp(ui->SearchString->text());
+    if(!ui->SearchString->text().startsWith("pname:",Qt::CaseSensitive))
+        session->searcheApp(ui->SearchString->text());
 }
 
 void MainWindow::AppsResponseHeandle(AppsResponse response)
 {
-  QList< QPair<QString,QString> > data;
-  for(int i=0;i!=response.app_size();i++)
+    QList< QPair<QString,QString> > data;
+    for(int i=0;i!=response.app_size();i++)
     {
-      data.append(
-            QPair<QString,QString>(response.app(i).title().c_str(),
-                                   response.app(i).rating().c_str())
-            );
+        data.append(
+                    QPair<QString,QString>(QString::fromUtf8(response.app(i).title().c_str()),
+                                           response.app(i).rating().c_str())
+                    );
     }
-  showCompletion(data);
+    showCompletion(data);
 }
 
 void MainWindow::setupSuggest()
 {
-  suggest->setColumnCount(2);
-  suggest->setEditTriggers(QTableWidget::NoEditTriggers);
-  suggest->setFrameStyle(QFrame::Box | QFrame::Plain);
-  suggest->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-  suggest->setSelectionBehavior(QTableWidget::SelectRows);
-  suggest->verticalHeader()->hide();
-  suggest->horizontalHeader()->hide();
-  suggest->installEventFilter(this);
-  suggest->setMouseTracking(true);
-  suggest->setWindowFlags(Qt::Popup);
-  suggest->setFocusPolicy(Qt::NoFocus);
-  suggest->setFocusProxy(ui->SearchString);
-  //suggest->hide();
+    suggest->setColumnCount(2);
+    suggest->setEditTriggers(QTableWidget::NoEditTriggers);
+    suggest->setFrameStyle(QFrame::Box | QFrame::Plain);
+    suggest->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    suggest->setSelectionBehavior(QTableWidget::SelectRows);
+    suggest->verticalHeader()->hide();
+    suggest->horizontalHeader()->hide();
+    suggest->installEventFilter(this);
+    suggest->setMouseTracking(true);
+    suggest->setWindowFlags(Qt::Popup);
+    suggest->setFocusPolicy(Qt::NoFocus);
+    suggest->setFocusProxy(ui->SearchString);
+    //suggest->hide();
 }
 
 void MainWindow::showCompletion(QList<QPair<QString, QString> >const &data)
 {
-  if (data.isEmpty())
-    return;
-  const QPalette &pal = ui->SearchString->palette();
-  QColor color = pal.color(QPalette::Disabled, QPalette::WindowText);
+    if (data.isEmpty())
+        return;
+    const QPalette &pal = ui->SearchString->palette();
+    QColor color = pal.color(QPalette::Disabled, QPalette::WindowText);
 
-  suggest->setUpdatesEnabled(false);
-  suggest->clear();
-  suggest->setRowCount(data.count());
-  for (int i = 0; i < data.count(); ++i) {
-      QTableWidgetItem * titel=new QTableWidgetItem(data[i].first);
-      QTableWidgetItem * rating=new QTableWidgetItem(data[i].second);
-      titel->setTextAlignment(Qt::AlignRight);
-      rating->setTextAlignment(Qt::AlignRight);
-      titel->setTextColor(color);
-      rating->setTextColor(color);
+    suggest->setUpdatesEnabled(false);
+    suggest->clear();
+    suggest->setRowCount(data.count());
+    for (int i = 0; i < data.count(); ++i) {
+        QTableWidgetItem * titel=new QTableWidgetItem(data[i].first);
+        QTableWidgetItem * rating=new QTableWidgetItem(data[i].second);
+        titel->setTextAlignment(Qt::AlignLeft);
+        rating->setTextAlignment(Qt::AlignRight);
+        titel->setTextColor(color);
+        rating->setTextColor(color);
 
-      suggest->setItem(i,0,titel);
-      suggest->setItem(i,1,rating);
-      suggest->setRowHeight(i,20);
+        suggest->setItem(i,0,titel);
+        suggest->setItem(i,1,rating);
+        suggest->setRowHeight(i,20);
     }
 
-  suggest->setCurrentItem(suggest->item(0,0));
-  suggest->resizeColumnsToContents();
-  suggest->adjustSize();
-  suggest->setUpdatesEnabled(true);
+    suggest->setCurrentItem(suggest->item(0,0));
+    suggest->resizeColumnsToContents();
+    suggest->adjustSize();
+    suggest->setUpdatesEnabled(true);
 
-  suggest->move(ui->SearchString->mapToGlobal(QPoint(0, ui->SearchString->height())));
-  suggest->setFocus();
-  suggest->show();
+    suggest->move(ui->SearchString->mapToGlobal(QPoint(0, ui->SearchString->height())));
+    suggest->setFocus();
+    suggest->show();
 }
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
 {
-  {
-    if (obj != suggest)
-      return false;
+    {
+        if (obj != suggest)
+            return false;
 
-    if (ev->type() == QEvent::MouseButtonPress) {
-        suggest->hide();
-        ui->SearchString->setFocus();
-        return true;
-      }
-
-    if (ev->type() == QEvent::KeyPress) {
-
-        bool consumed = false;
-        int key = static_cast<QKeyEvent*>(ev)->key();
-        switch (key) {
-          case Qt::Key_Enter:
-          case Qt::Key_Return:
-            doneCompletion();
-            consumed = true;
-
-          case Qt::Key_Escape:
-            ui->SearchString->setFocus();
+        if (ev->type() == QEvent::MouseButtonPress) {
             suggest->hide();
-            consumed = true;
-
-          case Qt::Key_Up:
-          case Qt::Key_Down:
-          case Qt::Key_Home:
-          case Qt::Key_End:
-          case Qt::Key_PageUp:
-          case Qt::Key_PageDown:
-            break;
-
-          default:
             ui->SearchString->setFocus();
-            ui->SearchString->event(ev);
-            suggest->hide();
-            break;
-          }
+            return true;
+        }
 
-        return consumed;
-      }
+        if (ev->type() == QEvent::KeyPress) {
 
-    return false;
-  }
+            bool consumed = false;
+            int key = static_cast<QKeyEvent*>(ev)->key();
+            switch (key) {
+            case Qt::Key_Enter:
+            case Qt::Key_Return:
+                doneCompletion();
+                consumed = true;
+
+            case Qt::Key_Escape:
+                ui->SearchString->setFocus();
+                suggest->hide();
+                consumed = true;
+
+            case Qt::Key_Up:
+            case Qt::Key_Down:
+            case Qt::Key_Home:
+            case Qt::Key_End:
+            case Qt::Key_PageUp:
+            case Qt::Key_PageDown:
+                break;
+
+            default:
+                ui->SearchString->setFocus();
+                ui->SearchString->event(ev);
+                suggest->hide();
+                break;
+            }
+
+            return consumed;
+        }
+
+        return false;
+    }
 }
 
 void MainWindow::doneCompletion()
 {
-  timer->stop();
-  suggest->hide();
-  ui->SearchString->setFocus();
-  QTableWidgetItem *item = suggest->currentItem();
-  if (item) {
-      ui->SearchString->setText(item->text());
-      QKeyEvent *e;
-      e = new QKeyEvent(QEvent::KeyPress, Qt::Key_Enter, Qt::NoModifier);
-      QApplication::postEvent(ui->SearchString, e);
-      e = new QKeyEvent(QEvent::KeyRelease, Qt::Key_Enter, Qt::NoModifier);
-      QApplication::postEvent(ui->SearchString, e);
+    timer->stop();
+    suggest->hide();
+    ui->SearchString->setFocus();
+    QTableWidgetItem *item = suggest->currentItem();
+    if (item) {
+        ui->SearchString->setText(item->text());
+        QKeyEvent *e;
+        e = new QKeyEvent(QEvent::KeyPress, Qt::Key_Enter, Qt::NoModifier);
+        QApplication::postEvent(ui->SearchString, e);
+        e = new QKeyEvent(QEvent::KeyRelease, Qt::Key_Enter, Qt::NoModifier);
+        QApplication::postEvent(ui->SearchString, e);
     }
 }

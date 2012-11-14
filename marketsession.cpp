@@ -32,13 +32,13 @@ MarketSession::MarketSession(QObject * parent)
 {
     context.set_issecure(true);
     context.set_version(2009011);
-    context.set_usercountry("GB");
-    context.set_userlanguage("en");
     context.set_deviceandsdkversion("passion:9");
     context.set_operatoralpha("T-Mobile");
     context.set_simoperatoralpha("T-Mobile");
     context.set_operatornumeric("310260");
     context.set_simoperatornumeric("310260");
+    context.set_usercountry("GB");
+    context.set_userlanguage("ru");
 
     this->isLoggedIn = false;
     this->isAuthFailed = false;
@@ -75,7 +75,7 @@ App MarketSession::getAppInfo(QString name) {
     qDebug() << "\nCALL: MarketSession::getAppInfo(QString)";
     Request::RequestGroup group;
     AppsRequest app;
-    app.set_query(name.toAscii());
+    app.set_query(name.toUtf8());
     app.set_startindex(0);
     app.set_entriescount(10);
     app.set_withextendedinfo(true);
@@ -96,7 +96,7 @@ GetAssetResponse::InstallAsset MarketSession::getInstallAsset(QString appId) {
     qDebug() << "\nCALL: MarketSession::getInstallAsses(QString)";
     Request::RequestGroup group;
     GetAssetRequest assetRequest;
-    assetRequest.set_assetid(appId.toAscii());
+    assetRequest.set_assetid(appId.toUtf8());
     group.mutable_getassetrequest()->CopyFrom(assetRequest);
     return execute(group)->getassetresponse().installasset(0);
 }
@@ -114,7 +114,7 @@ void MarketSession::searcheApp(const QString &query)
 {
   Request::RequestGroup group;
   AppsRequest app;
-  app.set_query(query.toAscii());
+  app.set_query(query.toUtf8());
   app.set_startindex(0);
   app.set_ordertype(AppsRequest_OrderType_FEATURED);
   app.set_entriescount(10);
@@ -123,6 +123,7 @@ void MarketSession::searcheApp(const QString &query)
   Response::ResponseGroup * responseGroup = execute(group);
   if (responseGroup == 0) {
       emit MessageSignal(NoApp); ///////////////////
+      return;
   }
   emit SearcheComplite(responseGroup->appsresponse());
 }

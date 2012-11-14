@@ -31,6 +31,10 @@ Settings::Settings(QWidget * parent)
     ui->language->setText(settings->value("language").toString());
     ui->operatorSym->setText(settings->value("operator").toString());
     ui->operatorNum->setText(settings->value("operatorNum").toString());
+
+    session->setOperatorAlpha(settings->value("operator").toString());
+    session->setOperatorNumeric(settings->value("operatorNum").toString());
+    session->setContry(settings->value("country").toString(),settings->value("language").toString());
     emit NeedToRelogin();
 }
 
@@ -47,6 +51,10 @@ void Settings::on_Save_clicked()
     settings->setValue("language",ui->language->text());
     settings->setValue("operator",ui->operatorSym->text());
     settings->setValue("operatorNum",ui->operatorNum->text());
+
+    session->setOperatorAlpha(settings->value("operator").toString());
+    session->setOperatorNumeric(settings->value("operatorNum").toString());
+    session->setContry(settings->value("country").toString(),settings->value("language").toString());
     close();
     emit NeedToRelogin();
     session->login(ui->email->text(), ui->password->text(), ui->androidID->text(), QString("HOSTED_OR_GOOGLE"));

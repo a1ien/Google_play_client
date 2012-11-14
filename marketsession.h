@@ -70,6 +70,24 @@ public:
         return authSubToken;
     }
 
+    void setOperatorNumeric(QString const& num)
+    {
+        context.set_operatornumeric(num.toUtf8());
+        context.set_simoperatornumeric(num.toUtf8());
+    }
+
+    void setOperatorAlpha(QString const& alpha)
+    {
+        context.set_operatoralpha(alpha.toUtf8());
+        context.set_simoperatoralpha(alpha.toUtf8());
+    }
+
+    void setContry(QString const& contry,QString const& lang)
+    {
+        context.set_usercountry(contry.toUtf8());
+        context.set_userlanguage(lang.toUtf8());
+    }
+
     // Responce executor
     Response::ResponseGroup * execute(Request::RequestGroup requestGroup);
 
