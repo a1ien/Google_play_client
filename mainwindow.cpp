@@ -190,48 +190,21 @@ void MainWindow::autoSuggest()
 
 void MainWindow::AppsResponseHeandle(AppsResponse response)
 {
-    QList< QPair<QString,QString> > data;
-    for(int i=0;i!=response.app_size();i++)
-    {
-        data.append(
-                    QPair<QString,QString>(QString::fromUtf8(response.app(i).title().c_str()),
-                                           response.app(i).rating().c_str())
-                    );
-    }
-    showCompletion(data);
-}
-
-void MainWindow::setupSuggest()
-{
-    suggest->setColumnCount(2);
-    suggest->setEditTriggers(QTableWidget::NoEditTriggers);
-    suggest->setFrameStyle(QFrame::Box | QFrame::Plain);
-    suggest->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    suggest->setSelectionBehavior(QTableWidget::SelectRows);
-    suggest->verticalHeader()->hide();
-    suggest->horizontalHeader()->hide();
-    suggest->installEventFilter(this);
-    suggest->setMouseTracking(true);
-    suggest->setWindowFlags(Qt::Popup);
-    suggest->setFocusPolicy(Qt::NoFocus);
-    suggest->setFocusProxy(ui->SearchString);
-    //suggest->hide();
-}
-
-void MainWindow::showCompletion(QList<QPair<QString, QString> >const &data)
-{
-    if (data.isEmpty())
+    if (!response.app_size())
         return;
+
     const QPalette &pal = ui->SearchString->palette();
     QColor color = pal.color(QPalette::Disabled, QPalette::WindowText);
 
     suggest->setUpdatesEnabled(false);
     suggest->clear();
-    suggest->setRowCount(data.count());
-    for (int i = 0; i < data.count(); ++i) {
-        QTableWidgetItem * titel=new QTableWidgetItem(data[i].first);
-        QTableWidgetItem * rating=new QTableWidgetItem(data[i].second);
+    suggest->setRowCount(response.app_size());
+    for(int i=0;i!=response.app_size();i++)
+    {
+        QTableWidgetItem * titel=new QTableWidgetItem(response.app(i).title().c_str());
+        QTableWidgetItem * rating=new QTableWidgetItem(response.app(i).rating().c_str());
         titel->setTextAlignment(Qt::AlignLeft);
+        titel->setData(Qt::UserRole,response.app(i).packagename().c_str());
         rating->setTextAlignment(Qt::AlignRight);
         titel->setTextColor(color);
         rating->setTextColor(color);
@@ -249,6 +222,23 @@ void MainWindow::showCompletion(QList<QPair<QString, QString> >const &data)
     suggest->move(ui->SearchString->mapToGlobal(QPoint(0, ui->SearchString->height())));
     suggest->setFocus();
     suggest->show();
+}
+
+void MainWindow::setupSuggest()
+{
+    suggest->setColumnCount(2);
+    suggest->setEditTriggers(QTableWidget::NoEditTriggers);
+    suggest->setFrameStyle(QFrame::Box | QFrame::Plain);
+    suggest->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    suggest->setSelectionBehavior(QTableWidget::SelectRows);
+    suggest->verticalHeader()->hide();
+    suggest->horizontalHeader()->hide();
+    suggest->installEventFilter(this);
+    suggest->setMouseTracking(true);
+    suggest->setWindowFlags(Qt::Popup);
+    suggest->setFocusPolicy(Qt::NoFocus);
+    suggest->setFocusProxy(ui->SearchString);
+    //suggest->hide();
 }
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
@@ -307,7 +297,7 @@ void MainWindow::doneCompletion()
     ui->SearchString->setFocus();
     QTableWidgetItem *item = suggest->currentItem();
     if (item) {
-        ui->SearchString->setText(item->text());
+        ui->SearchString->setText(QString("pname:%1").arg(item->data(Qt::UserRole).toString()));
         QKeyEvent *e;
         e = new QKeyEvent(QEvent::KeyPress, Qt::Key_Enter, Qt::NoModifier);
         QApplication::postEvent(ui->SearchString, e);

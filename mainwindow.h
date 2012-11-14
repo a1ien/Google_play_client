@@ -60,7 +60,6 @@ public slots:
 
 private:
   void setupSuggest();
-  void showCompletion(QList< QPair<QString,QString> >const& data);
   bool eventFilter(QObject *obj, QEvent * ev);
   void doneCompletion();
 
