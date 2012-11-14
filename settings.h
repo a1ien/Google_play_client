@@ -47,7 +47,7 @@ public:
                                 settings->value("password").toString().isEmpty() ||
                                 settings->value("androidid").toString().isEmpty();}
 
-
+    QSettings & getSettings() { return *settings;}
 private slots:
     void on_Save_clicked();
     void on_Cancel_clicked();

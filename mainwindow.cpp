@@ -18,6 +18,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QDebug>
+#include <QDir>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
@@ -73,8 +74,15 @@ void MainWindow::onLogon() {
      }
 
      ui->AppInfo->append(QString("Type:\t%1").arg(qtype));
-     QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
-             QString ("%1.%2.apk").arg(app.title().c_str()).arg(app.version().c_str()), tr("*.apk"));
+     QFileDialog SaveDialog;
+     if(settings->getSettings().value("currentDir").toString().isEmpty())
+         settings->getSettings().setValue("currentDir", SaveDialog.directory().absolutePath());
+     qDebug()<<settings->getSettings().value("currentDir");
+     QString fileName = SaveDialog.getSaveFileName(this, tr("Save File"),
+                                                   QString ("%3/%1.%2.apk").arg(app.title().c_str()).arg(app.version().c_str()).arg(settings->getSettings().value("currentDir").toString()),
+                                                   tr("*.apk"));
+     settings->getSettings().setValue("currentDir", SaveDialog.directory().absolutePath());
+     qDebug()<<SaveDialog.directory().absolutePath();
      if (fileName.isEmpty()) {
          return;
      }

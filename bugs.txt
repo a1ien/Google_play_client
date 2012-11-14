@@ -7,6 +7,6 @@ Example, ???
          блаблабла
 
 #2
-New
+Waiting for #1 fix
 
-App fails at download w/o Internet connection
+App fails at download  w/o Internet connection
