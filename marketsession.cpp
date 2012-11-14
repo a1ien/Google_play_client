@@ -23,12 +23,16 @@
 #include <QDebug>
 #include "decompressor.h"
 
-MarketSession * MarketSession::instance = 0;
+MarketSession * MarketSession::instance = NULL;
 
 MarketSession::MarketSession(QObject * parent)
     : QObject(parent),
       SERVICE("androidsecure"),
-      URL_LOGIN("https://www.google.com/accounts/ClientLogin")
+      URL_LOGIN("https://www.google.com/accounts/ClientLogin"),
+      http(NULL),
+      isLoggedIn(false),
+      isLoggingIn(false),
+      isAuthFailed(false)
 {
     context.set_issecure(true);
     context.set_version(2009011);
@@ -39,10 +43,6 @@ MarketSession::MarketSession(QObject * parent)
     context.set_simoperatornumeric("310260");
     context.set_usercountry("GB");
     context.set_userlanguage("ru");
-
-    this->isLoggedIn = false;
-    this->isAuthFailed = false;
-    this->isLoggingIn = false;
 }
 
 MarketSession * MarketSession::getInstance(QObject * parent) {
@@ -103,15 +103,18 @@ GetAssetResponse::InstallAsset MarketSession::getInstallAsset(QString appId) {
 
 void MarketSession::login() {
     qDebug() << "\nCALL: MarketSession::login()";
-    if ((this->email.isEmpty()) || (this->password.isEmpty()) ||
-            (this->androidID.isEmpty()) || (this->accountType.isEmpty())) {
+    if ((email.isEmpty()) || (password.isEmpty()) ||
+            (androidID.isEmpty()) || (accountType.isEmpty())) {
         emit MessageSignal(SettingsNotSet);
     }
-    this->login(this->email, this->password, this->androidID, this->accountType);
+    login(email, password, androidID, accountType);
 }
 
 void MarketSession::searcheApp(const QString &query)
 {
+    if (!isLoggedIn) {
+        return;
+    }
   Request::RequestGroup group;
   AppsRequest app;
   app.set_query(query.toUtf8());
@@ -130,15 +133,15 @@ void MarketSession::searcheApp(const QString &query)
 
 void MarketSession::login(QString email, QString password, QString androidId, QString accountType) {
     qDebug() << "\nCALL: MarketSession::login(QString, QString, QString, QString)";
-    if (this->isLoggedIn) {
+    if (isLoggedIn) {
         return;
     }
-    this->isLoggingIn = true;
+    isLoggingIn = true;
     setAndroidID(androidId);
-    this->email       = email;
-    this->password    = password;
-    this->androidID   = androidId;
-    this->accountType = accountType;
+    email       = email;
+    password    = password;
+    androidID   = androidId;
+    accountType = accountType;
     QMap<QString,QString> params;
     params.insert("Email",email);
     params.insert("Passwd", password);
@@ -165,39 +168,39 @@ void MarketSession::loginFinished() {
         emit MessageSignal(AuthorizationFailedMessagebox);
         emit MessageSignal(AuthorizationFailedNotification);
         isLoggedIn = false;
-        this->isAuthFailed = true;
+        isAuthFailed = true;
     }
     else {
         qDebug() << authKey.toAscii();
         setAuthSubToken(authKey);
         http->deleteLater();
-        this->isLoggedIn = true;
-        this->isAuthFailed = false;
+        isLoggedIn = true;
+        isAuthFailed = false;
         MessageSignal(AuthorizationOk);
     }
-    this->isLoggingIn = false;
-    this->executeWaitingTasksQuery();
+    isLoggingIn = false;
+    executeWaitingTasksQuery();
 }
 
 void MarketSession::executeWaitingTasksQuery() {
-    while (!this->waitingTaskQuery.empty()) {
-        Task task = this->waitingTaskQuery.front();
-        this->waitingTaskQuery.pop_front();
+    while (!waitingTaskQuery.empty()) {
+        Task task = waitingTaskQuery.front();
+        waitingTaskQuery.pop_front();
         (this->*task)();
     }
 }
 
 void MarketSession::getApp() {
     qDebug() << "\nCALL: MarketSession::getApp()";
-    if (!isLoggedIn && !this->isAuthFailed) {
-        if (!this->isLoggingIn) {
-            this->login();
+    if (!isLoggedIn && !isAuthFailed) {
+        if (!isLoggingIn) {
+            login();
         }
         else {
-            this->waitingTaskQuery.push_back(&MarketSession::getApp);
+            waitingTaskQuery.push_back(&MarketSession::getApp);
         }
     }
-    else if (this->isLoggedIn) {
+    else if (isLoggedIn) {
         emit GetAppSignal();
     }
     else {
@@ -282,6 +285,6 @@ QByteArray MarketSession::gzipDecompress(QByteArray compressData) {
 
 void MarketSession::needToReloginHandler() {
     qDebug() << "\nCALL: MarketSession: needToReloginHandler()";
-    this->isLoggedIn = false;
+    isLoggedIn = false;
     qDebug() << "\nSIGNAL: NeedToRelogin;\nHANDLER: MarketSession::needToLoginHandler()\n";
 }

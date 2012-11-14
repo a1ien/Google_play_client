@@ -184,8 +184,11 @@ void MainWindow::messageSignalHandler(MessageTypes type, const QString descripti
 
 void MainWindow::autoSuggest()
 {
+    if(ui->SearchString->text().length()<3) return;
     if(!ui->SearchString->text().startsWith("pname:",Qt::CaseSensitive))
-        session->searcheApp(ui->SearchString->text());
+    {
+       session->searcheApp(ui->SearchString->text());
+    }
 }
 
 void MainWindow::AppsResponseHeandle(AppsResponse response)
