@@ -86,6 +86,12 @@ void MainWindow::getAppSignalHandler() {
      }
 
      ui->AppInfo->append(QString("Type:\t%1").arg(qtype));
+     if(app.has_extendedinfo())
+         {
+           if(app.extendedinfo().has_description())
+             ui->AppInfo->append(QString("Description:\t%1").arg(app.extendedinfo().description().c_str()));
+         }
+
      QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
              QString ("%1.%2.apk").arg(app.title().c_str()).arg(app.version().c_str()), tr("*.apk"));
      if (fileName.isEmpty()) {
