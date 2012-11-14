@@ -137,9 +137,9 @@ void MainWindow::messageSignalHandler(MessageTypes type, const QString descripti
         text = "Response has incorrect format and cannot be parsed";
         break;
     case SettingsNotSet:
-        text = "\tNot all of required settings are specified."
-                "\n\nPlease, check e-mail, password and android ID in Settings window.";
-        header = "Incomplete credentials";
+        text = "Not all of required settings are specified."
+                "\nPlease, check your e-mail, password and android ID in the settings.";
+        header = "Google Play client";
         displayInMessageBox = true;
         break;
     case UnknownError:
