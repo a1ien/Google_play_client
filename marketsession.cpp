@@ -138,10 +138,10 @@ void MarketSession::login(QString email, QString password, QString androidId, QS
     }
     isLoggingIn = true;
     setAndroidID(androidId);
-    email       = email;
-    password    = password;
-    androidID   = androidId;
-    accountType = accountType;
+    this->email       = email;
+    this->password    = password;
+    this->androidID   = androidId;
+    this->accountType = accountType;
     QMap<QString,QString> params;
     params.insert("Email",email);
     params.insert("Passwd", password);
