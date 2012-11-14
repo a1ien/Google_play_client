@@ -38,8 +38,6 @@ MainWindow::~MainWindow() {
 
 void MainWindow::on_Download_clicked() {
     if (settings->someIsEmpty()) {
-        // QMessageBox::information(this, tr("Your credentials are incompelete"),
-        // tr("\tNot all of your settings are specified.\n\n\tPlease, fill all settings fields before download."));
         emit MessageSignal(SettingsNotSet);
     }
     else {
@@ -94,30 +92,28 @@ void MainWindow::on_SettingsButton_clicked() {
 }
 
 void MainWindow::messageSignalHandler(MessageTypes type, const QString description) {
-    // QMessageBox::information(this, tr("Your credentials are incompelete"),
-    //         tr("\tNot all of your settings are specified.\n\n\tPlease, fill all settings fields before download."));
     QString text   = "",
             header = "";
     bool appIsDead           = false,
          displayInMessageBox = false;
     switch (type) {
         case EmptyResponce:
-            text = "Responce contains no data.";
+            text = "Response contains no data.";
             break;
         case NoApp:
-            text = "Application not found.";
+            text = "Requested package is not found.";
             break;
         case ResponceParsingFailed:
-            text = "Responce has incorrect format and cannot be parsed";
+            text = "Response has incorrect format and cannot be parsed";
             break;
         case SettingsNotSet:
-            text = "\tNot all of your settings are specified."
-                    "\n\n\tPlease, fill all settings fields before download.";
-            header = "\tNot all of your settings are specified.\n\n\tPlease, fill all settings fields before download.";
+            text = "\tNot all of required settings are specified."
+                    "\n\nPlease, check e-mail, password and android ID in Settings window.";
+            header = "Incomplete credentials";
             displayInMessageBox = true;
             break;
         case UnknownError:
-            text = "Unknown error occured. Send this info to developers please:\n" + description;
+            text = "Unknown error occured. Send this info to developers, please:\n" + description;
             break;
         case Waiting:
             text = "Waiting for your response completion...";

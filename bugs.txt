@@ -1,4 +1,12 @@
 #1
 New
 
-App fails, if package name is specified with cyrillic
+App fails, if package name is specified with cyrillic, as well as question sign.
+
+Example, ???
+         блаблабла
+
+#2
+New
+
+App fails at download w/o Internet connection
