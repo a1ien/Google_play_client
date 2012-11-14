@@ -1,0 +1,4 @@
+#1
+New
+
+App fails, if package name is specified with cyrillic
