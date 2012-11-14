@@ -47,7 +47,6 @@ public:
                                 settings->value("password").toString().isEmpty() ||
                                 settings->value("androidid").toString().isEmpty();}
 
-
 private slots:
     void on_Save_clicked();
     void on_Cancel_clicked();

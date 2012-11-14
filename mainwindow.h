@@ -21,6 +21,8 @@
 #include "market.pb.h"
 #include "downloader.h"
 #include <QMainWindow>
+#include <QTableWidget>
+#include <QTimer>
 #include "marketsession.h"
 
 namespace Ui {
@@ -47,12 +49,21 @@ private slots:
 public slots:
   void onLogon();
   void messageSignalHandler(MessageTypes type, const QString description);
+  void autoSuggest();
+  void AppsResponseHeandle(AppsResponse response);
 
 private:
+  void setupSuggest();
+  void showCompletion(QList< QPair<QString,QString> >const& data);
+  bool eventFilter(QObject *obj, QEvent * ev);
+  void doneCompletion();
+
   Ui::MainWindow * ui;
   Settings       * settings;
   MarketSession  * session;
   Downloader     * downloader;
+  QTableWidget   * suggest;
+  QTimer         * timer;
 };
 
 #endif // MAINWINDOW_H

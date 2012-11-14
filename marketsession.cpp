@@ -60,6 +60,7 @@ App MarketSession::getAppInfo(QString name) {
     app.set_query(name.toAscii());
     app.set_startindex(0);
     app.set_entriescount(10);
+    app.set_withextendedinfo(true);
 
     group.mutable_appsrequest()->CopyFrom(app);
     Response::ResponseGroup * responseGroup = execute(group);
@@ -79,6 +80,23 @@ GetAssetResponse::InstallAsset MarketSession::getInstallAsset(QString appId) {
   assetRequest.set_assetid(appId.toAscii());
   group.mutable_getassetrequest()->CopyFrom(assetRequest);
   return execute(group)->getassetresponse().installasset(0);
+}
+
+void MarketSession::searcheApp(const QString &query)
+{
+  Request::RequestGroup group;
+  AppsRequest app;
+  app.set_query(query.toAscii());
+  app.set_startindex(0);
+  app.set_ordertype(AppsRequest_OrderType_FEATURED);
+  app.set_entriescount(10);
+
+  group.mutable_appsrequest()->CopyFrom(app);
+  Response::ResponseGroup * responseGroup = execute(group);
+  if (responseGroup == 0) {
+      emit MessageSignal(NoApp); ///////////////////
+  }
+  emit SearcheComplite(responseGroup->appsresponse());
 }
 
 

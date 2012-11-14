@@ -56,6 +56,8 @@ public:
     static QNetworkRequest setUsualHeaderSet(QUrl url);
 
     GetAssetResponse::InstallAsset getInstallAsset(QString appId);
+    void searcheApp(QString const& query);
+
 private:
     void postUrl(const QString & url, QMap<QString, QString> params);
     QByteArray executeProtobuf(Request request);
@@ -65,6 +67,7 @@ private:
 signals:
     void logged();
     void MessageSignal(MessageTypes type, const QString description = "");
+    void SearcheComplite(AppsResponse);
 public slots:
 
 private slots:
