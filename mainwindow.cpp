@@ -51,26 +51,31 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::on_Download_clicked() {
-  if (settings->someIsEmpty()) {
-      emit MessageSignal(SettingsNotSet);
+
+    //Check if data necessary for login is specified
+    if (settings->someIsEmpty()) {
+        emit MessageSignal(SettingsNotSet);
     }
-  else {
-      session->login(settings->email(), settings->password(), settings->androidID(), QString("HOSTED_OR_GOOGLE"));
-      session->getApp();
+    else {
+        //Log in Auth server
+        session->login(settings->email(), settings->password(), settings->androidID(), QString("HOSTED_OR_GOOGLE"));
+        session->getApp();
     }
 }
 
 void MainWindow::getAppSignalHandler() {
-  qDebug() << "\nCALL: MainWindow::getAppSignalHandler()";
-  App app = session->getAppInfo(ui->SearchString->text().trimmed());
 
-  if (app.has_id()) {
-      ui->AppInfo->clear();
-      ui->AppInfo->append(QString("Title:\t%1").arg(app.title().c_str()));
-      ui->AppInfo->append(QString("Version:\t%1").arg(app.version().c_str()));
-      ui->AppInfo->append(QString("Rating:\t%1").arg(app.rating().c_str()));
-      QString qtype;
-      switch(app.apptype()) {
+    qDebug() << "\nCALL: MainWindow::getAppSignalHandler()";
+    //Get application info
+    App app = session->getAppInfo(ui->SearchString->text().trimmed());
+    //Parse app info and show it in AppInfo field
+    if (app.has_id()) {
+        ui->AppInfo->clear();
+        ui->AppInfo->append(QString("Title:\t%1").arg(app.title().c_str()));
+        ui->AppInfo->append(QString("Version:\t%1").arg(app.version().c_str()));
+        ui->AppInfo->append(QString("Rating:\t%1").arg(app.rating().c_str()));
+        QString qtype;
+        switch(app.apptype()) {
         case 0:
           qtype = "None";
           break;
@@ -98,42 +103,52 @@ void MainWindow::getAppSignalHandler() {
           ui->AppInfo->moveCursor (QTextCursor::Start);
           ui->AppInfo->ensureCursorVisible();
 
-        }
+        //Preset current directory in settings
+        if(settings->getSettings().value("currentDir").toString().isEmpty())
+            settings->getSettings().setValue("currentDir", QDir ::currentPath());
 
-      if(settings->getSettings().value("currentDir").toString().isEmpty())
-        settings->getSettings().setValue("currentDir", QDir ::currentPath());
+        //Open a dialogue to save downloaded package
+        QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
+                                                        QString ("%3/%1.%2.apk")
+                                                        .arg(app.title().c_str())
+                                                        .arg(app.version().c_str())
+                                                        .arg(settings->getSettings().value("currentDir").toString()),
+                                                        tr("*.apk"));
+        //Save destination directory in settings
+        if(!fileName.isEmpty())
+            settings->getSettings().setValue("currentDir", QFileInfo (fileName).absolutePath());
+        else
+            return;
 
-      QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
-                                                      QString ("%3/%1.%2.apk")
-                                                      .arg(app.title().c_str())
-                                                      .arg(app.version().c_str())
-                                                      .arg(settings->getSettings().value("currentDir").toString()),
-                                                      tr("*.apk"));
-      if(!fileName.isEmpty())
-        settings->getSettings().setValue("currentDir", QFileInfo (fileName).absolutePath());
-      else
-        return;
-
-      downloader->DownloadFile(session->getInstallAsset(app.id().c_str()), fileName);
+        //Download a package
+        downloader->DownloadFile(session->getInstallAsset(app.id().c_str()), fileName);
     }
+   }
 }
 
 void MainWindow::on_SearchString_textEdited(const QString & arg1) {
-  ui->Download->setEnabled(!arg1.trimmed().isEmpty());
+
+    //Enable "Download" button only if Search field isn't empty
+    ui->Download->setEnabled(!arg1.trimmed().isEmpty());
+
 }
 
 
 void MainWindow::on_SettingsButton_clicked() {
-  settings->exec();
+
+    //Open Settings window
+    settings->exec();
 }
 
 void MainWindow::messageSignalHandler(MessageTypes type, const QString description) {
-  qDebug() << "\nCALL: MainWindow::messageSignalHandler()";
-  QString text   = "",
-      header = "";
-  bool appIsDead           = false,
-      displayInMessageBox = false;
-  switch (type) {
+
+    //Show errors in AppInfo field & messages
+    qDebug() << "\nCALL: MainWindow::messageSignalHandler()";
+    QString text   = "",
+            header = "";
+    bool appIsDead           = false,
+            displayInMessageBox = false;
+    switch (type) {
     case EmptyResponce:
       text = "Response contains no data.";
       break;
@@ -198,8 +213,11 @@ void MainWindow::messageSignalHandler(MessageTypes type, const QString descripti
 
 void MainWindow::autoSuggest()
 {
-  if(ui->SearchString->text().length()<3) return;
-  if(!ui->SearchString->text().startsWith("pname:",Qt::CaseSensitive))
+
+    //Show suggests if text in Search field doesn't start from "pname:" and its length is more than 3 symbols
+    if(ui->SearchString->text().length()<3) return;
+    if(!ui->SearchString->text().startsWith("pname:",Qt::CaseSensitive))
+
     {
       session->searcheApp(ui->SearchString->text());
     }

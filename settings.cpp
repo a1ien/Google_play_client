@@ -24,6 +24,8 @@ Settings::Settings(QWidget * parent)
     QObject::connect(this, SIGNAL(NeedToRelogin()), session, SLOT(needToReloginHandler()));
     ui->setupUi(this);
     settings = new QSettings("config.ini", QSettings::IniFormat, this);
+
+    // Show settings values in corresponding fields
     ui->email->setText(settings->value("email").toString());
     ui->password->setText(settings->value("password").toString());
     ui->androidID->setText(settings->value("androidID").toString());
@@ -44,6 +46,7 @@ Settings::~Settings() {
 
 void Settings::on_Save_clicked()
 {
+    //Save settings
     settings->setValue("email", ui->email->text());
     settings->setValue("password", ui->password->text());
     settings->setValue("androidID", ui->androidID->text());
@@ -57,10 +60,12 @@ void Settings::on_Save_clicked()
     session->setContry(settings->value("country").toString(),settings->value("language").toString());
     close();
     emit NeedToRelogin();
+    //Relogin w/ new settings
     session->login(ui->email->text(), ui->password->text(), ui->androidID->text(), QString("HOSTED_OR_GOOGLE"));
 }
 
 void Settings::on_Cancel_clicked() {
+    // Show settings values in corresponding fields
     ui->email->setText(settings->value("email").toString());
     ui->password->setText(settings->value("password").toString());
     ui->androidID->setText(settings->value("androidID").toString());
