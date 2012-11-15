@@ -32,6 +32,7 @@ enum MessageTypes {
     SettingsNotSet,                  // Settings were not set
     NoApp,                           // No such application in Google Play
     PaindApp,                        // It's Paid App
+    AppDownloaded,                   // App was success download
     ResponceParsingFailed,           // Cannot parse the response
     Waiting,                         // Waiting for operation completion
     BadRequest,                      // Bad request

@@ -35,6 +35,7 @@ MainWindow::MainWindow(QWidget *parent)
   connect(session, SIGNAL(MessageSignal(MessageTypes, QString)), this, SLOT(messageSignalHandler(MessageTypes, QString)));
   connect(this, SIGNAL(MessageSignal(MessageTypes, QString)), this, SLOT(messageSignalHandler(MessageTypes, QString)));
   connect(session, SIGNAL(GetAppSignal()), this, SLOT(getAppSignalHandler()));
+  connect(downloader,SIGNAL(DownloadFinish(QString)),SLOT(messageSignalHandler(AuthorizationFailedMessagebox,QString)));
   setupSuggest();
   timer->setSingleShot(true);
   timer->setInterval(1000);
@@ -143,6 +144,11 @@ void MainWindow::messageSignalHandler(MessageTypes type, const QString descripti
       break;
     case ResponceParsingFailed:
       text = "Response has incorrect format and cannot be parsed";
+      break;
+    case AppDownloaded:
+      header = "Download complete";
+      text = "Application has been successfully saved" + description;
+      displayInMessageBox = true;
       break;
     case SettingsNotSet:
       text = "Not all of required settings are specified."

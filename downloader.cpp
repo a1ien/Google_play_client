@@ -64,7 +64,7 @@ void Downloader::requestComplete(QNetworkReply * reply)
         file.write(reply->readAll());
         file.close();
         urlRedirectedTo.clear();
-        emit DownloadFinish(reply->property("fileName").toString());
+        emit MessageSignal(AppDownloaded,reply->property("fileName").toString());
     }
     reply->deleteLater();
 }

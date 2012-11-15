@@ -33,7 +33,7 @@ public:
 
 signals:
     // This signal is usually sent when download is finished
-    void DownloadFinish(QString fileName);
+    void MessageSignal(MessageTypes type, const QString description = "");
 
 private slots:
     // This slot is usually used when request is finished
