@@ -141,7 +141,9 @@ void MainWindow::messageSignalHandler(MessageTypes type, const QString descripti
       text = "Requested package is not found.";
       break;
     case PaidApp:
+      header = "Error";
       text = "You are trying to download a paid app.";
+      displayInMessageBox = true;
       break;
     case ResponceParsingFailed:
       text = "Response has incorrect format and cannot be parsed";
