@@ -21,6 +21,7 @@
 #include <QtNetwork/QNetworkReply>
 #include <QObject>
 #include "market.pb.h"
+#include "marketsession.h"
 
 // The apk file downloader class
 class Downloader : public QObject {
