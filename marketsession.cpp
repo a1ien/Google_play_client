@@ -98,7 +98,15 @@ GetAssetResponse::InstallAsset MarketSession::getInstallAsset(QString appId) {
     GetAssetRequest assetRequest;
     assetRequest.set_assetid(appId.toUtf8());
     group.mutable_getassetrequest()->CopyFrom(assetRequest);
-    return execute(group)->getassetresponse().installasset(0);
+    Response::ResponseGroup * responseGroup = execute(group);
+    GetAssetResponse* asset;
+    if ((responseGroup == 0) || ((asset =
+            responseGroup->mutable_getassetresponse()) == 0) ||
+            (asset->installasset_size() == 0)) {
+        emit MessageSignal(NoApp); ///////////////////
+        return GetAssetResponse::InstallAsset();
+    }
+    return asset->installasset(0);
 }
 
 void MarketSession::login() {
@@ -138,10 +146,10 @@ void MarketSession::login(QString email, QString password, QString androidId, QS
     }
     isLoggingIn = true;
     setAndroidID(androidId);
-    email       = email;
-    password    = password;
-    androidID   = androidId;
-    accountType = accountType;
+    this->email       = email;
+    this->password    = password;
+    this->androidID   = androidId;
+    this->accountType = accountType;
     QMap<QString,QString> params;
     params.insert("Email",email);
     params.insert("Passwd", password);

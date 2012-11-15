@@ -26,6 +26,8 @@ Downloader::Downloader(QObject *parent) :
 
 void Downloader::DownloadFile(const GetAssetResponse::InstallAsset &ia, const QString &fileName)
 {
+    if(!ia.has_bloburl())
+      return;
     QUrl url(ia.bloburl().c_str());
     req = MarketSession::setUsualHeaderSet(url);
     req.setRawHeader("Cookie", QString("%1=%2").arg(ia.downloadauthcookiename().c_str())

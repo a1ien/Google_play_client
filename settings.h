@@ -39,10 +39,18 @@ public:
     QString androidID() {
         return settings->value("androidID").toString();
     }
-    QString language() { return settings->value("language").toString();}
-    QString country() { return settings->value("country").toString();}
-    QString operatorSym() { return settings->value("operator").toString();}
-    QString operatorNum() { return settings->value("operatorNum").toString();}
+    QString language() {
+        return settings->value("language").toString();
+    }
+    QString country() {
+        return settings->value("country").toString();
+    }
+    QString operatorSym() {
+        return settings->value("operator").toString();
+    }
+    QString operatorNum() {
+        return settings->value("operatorNum").toString();
+    }
 
     bool someIsEmpty() { return settings->value("email").toString().isEmpty() ||
                                 settings->value("password").toString().isEmpty() ||
@@ -54,7 +62,9 @@ signals:
     void NeedToRelogin();
 
 private slots:
+    // Handler for a Save button click event
     void on_Save_clicked();
+    // Handler for a Cancel button click event
     void on_Cancel_clicked();
 
 private:

@@ -24,6 +24,7 @@ Settings::Settings(QWidget * parent)
     QObject::connect(this, SIGNAL(NeedToRelogin()), session, SLOT(needToReloginHandler()));
     ui->setupUi(this);
     settings = new QSettings("config.ini", QSettings::IniFormat, this);
+
     // Show settings values in corresponding fields
     ui->email->setText(settings->value("email").toString());
     ui->password->setText(settings->value("password").toString());
