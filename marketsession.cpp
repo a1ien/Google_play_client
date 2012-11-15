@@ -103,7 +103,7 @@ GetAssetResponse::InstallAsset MarketSession::getInstallAsset(QString appId) {
     if ((responseGroup == 0) || ((asset =
             responseGroup->mutable_getassetresponse()) == 0) ||
             (asset->installasset_size() == 0)) {
-        emit MessageSignal(NoApp); ///////////////////
+        emit MessageSignal(PaidApp); ///////////////////
         return GetAssetResponse::InstallAsset();
     }
     return asset->installasset(0);
